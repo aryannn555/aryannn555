@@ -119,7 +119,6 @@ def build_font_css(subset_chars):
     .sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     """)
 
-    # Prefers-reduced-motion
     css_parts.append("""
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -141,7 +140,6 @@ def build_font_css(subset_chars):
 def load_or_fetch_contributions():
     json_path = os.path.join(DATA_DIR, "contributions.json")
     
-    # Try fetching fresh data if GITHUB_TOKEN is available
     token = os.environ.get("GITHUB_TOKEN")
     if token:
         try:
@@ -178,7 +176,6 @@ def load_or_fetch_contributions():
                 weeks = cal["weeks"]
                 total = cal["totalContributions"]
                 
-                # Compute streaks and active days
                 active_days = 0
                 longest = 0
                 current = 0
@@ -211,7 +208,6 @@ def load_or_fetch_contributions():
                     elif current > 0:
                         break
 
-                # Aggregate months
                 month_totals = {}
                 months_order = ["Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]
                 for d in all_days:
@@ -248,7 +244,6 @@ def load_or_fetch_contributions():
         with open(json_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    # Minimal fallback
     return {
         "username": "aryannn555",
         "total_contributions": 912,
@@ -263,37 +258,19 @@ def load_or_fetch_contributions():
 
 
 # ---------------------------------------------------------------------------
-# ASCII PORTRAIT GENERATOR (For Hero Card)
+# SILHOUETTE ASCII PORTRAIT GENERATOR (For Hero Card)
 # ---------------------------------------------------------------------------
 
-def generate_avatar_ascii(width=46, height=26):
-    CHARS = "  ..::--==++**##%%@@"
+def generate_avatar_ascii(width=60, height=38):
+    """
+    Renders high-definition silhouette stipple ASCII portrait.
+    Masks out background bokeh so dark hair, glasses, and blazer render cleanly.
+    """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
     if not os.path.exists(avatar_path):
         avatar_path = "/tmp/avatar.png"
     
-    tmp_bmp = "/tmp/avatar_card_gen.bmp"
-    try:
-        from PIL import Image
-        img = Image.open(avatar_path).convert('L')
-        img = img.resize((width, height))
-        pixels = list(img.getdata())
-        rows = []
-        for y in range(height):
-            line = []
-            for x in range(width):
-                lum = pixels[y * width + x]
-                if lum < 48:
-                    line.append(' ')
-                else:
-                    norm = (lum - 48) / (255.0 - 48)
-                    idx = int(norm * (len(CHARS) - 1))
-                    line.append(CHARS[idx])
-            rows.append("".join(line))
-        return rows
-    except Exception:
-        pass
-
+    tmp_bmp = "/tmp/avatar_hires_clean.bmp"
     try:
         subprocess.run(
             ["sips", "-z", str(height), str(width), "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
@@ -305,24 +282,42 @@ def generate_avatar_ascii(width=46, height=26):
         offset = struct.unpack("<I", data[10:14])[0]
         w = struct.unpack("<i", data[18:22])[0]
         h = struct.unpack("<i", data[22:26])[0]
-        is_top_down = h < 0
         abs_h, abs_w = abs(h), abs(w)
         stride = ((abs_w * 3 + 3) // 4) * 4
+        is_top_down = h < 0
+
+        # Ink density from lightest (space) to darkest ink (@)
+        CHARS = " .:-=+*#%@"
 
         rows = []
         for y in range(abs_h):
             actual_y = y if is_top_down else (abs_h - 1 - y)
             row_off = offset + actual_y * stride
             line = []
+            
+            ny = (y / (abs_h - 1))
+            
             for x in range(abs_w):
+                nx = (x / (abs_w - 1)) * 2 - 1
+                
                 px = row_off + x * 3
                 b, g, r = data[px], data[px+1], data[px+2]
                 lum = 0.299 * r + 0.587 * g + 0.114 * b
-                if lum < 48:
+                
+                # Silhouette mask for Aryan
+                head_dx = (nx - 0.02) / 0.36
+                head_dy = (ny - 0.32) / 0.30
+                in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
+                
+                shoulder_width = 0.40 + (ny - 0.55) * 1.3
+                in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
+                
+                if not (in_head or in_shoulders):
                     line.append(' ')
                 else:
-                    norm = (lum - 48) / (255.0 - 48)
-                    idx = int(norm * (len(CHARS) - 1))
+                    inv = 1.0 - (lum / 255.0)
+                    inv = math.pow(inv, 1.25)
+                    idx = int(inv * (len(CHARS) - 1))
                     line.append(CHARS[idx])
             rows.append("".join(line))
         return rows
@@ -335,21 +330,20 @@ def generate_avatar_ascii(width=46, height=26):
 # ---------------------------------------------------------------------------
 
 def render_hero_card():
-    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta.dev ↗"
+    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta.dev ↗"
     font_css = build_font_css(text_corpus)
-    ascii_rows = generate_avatar_ascii(width=46, height=26)
+    ascii_rows = generate_avatar_ascii(width=60, height=38)
 
+    # Use pure opacity keyframes so coordinates never get clobbered by CSS transforms!
     anim_css = "" if IS_STATIC else """
-    @keyframes heroFade {
-      0% { opacity: 0; transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
-    @keyframes asciiLineIn {
-      0% { opacity: 0; transform: translateY(2px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .hero-elem { opacity: 0; animation: heroFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .ascii-row { opacity: 0; animation: asciiLineIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .hero-badge { opacity: 0; animation: fadeIn 0.4s ease-out 0.08s forwards; }
+    .hero-name { opacity: 0; animation: fadeIn 0.4s ease-out 0.15s forwards; }
+    .hero-bio { opacity: 0; animation: fadeIn 0.4s ease-out 0.25s forwards; }
+    .ascii-row { opacity: 0; animation: fadeIn 0.2s ease-out forwards; }
     """
 
     svg = [
@@ -361,38 +355,36 @@ def render_hero_card():
         f'  <rect x="1" y="1" width="918" height="358" rx="20" fill="{COLOR_PAPER}" stroke="{COLOR_LINE}" stroke-width="1.5" />',
         '',
         '  <!-- Top Role Badge -->',
-        f'  <g class="hero-elem" style="animation-delay: {"0s" if IS_STATIC else "0.08s"};" transform="translate(42, 44)">',
-        f'    <rect x="0" y="-8" width="8" height="8" rx="1.5" fill="{COLOR_SKY}" />',
-        f'    <text class="geist" x="16" y="0" fill="{COLOR_INK_MUTED}" font-size="11.5" font-weight="600" letter-spacing="1.5">FULLSTACK &amp; AUDIO ENGINEER · CREATOR OF SVARIX</text>',
-        '  </g>',
+        f'  <g class="hero-badge">',
+        f'    <rect x="42" y="38" width="8" height="8" rx="2" fill="{COLOR_SKY}" />',
+        f'    <text class="geist" x="58" y="46" fill="{COLOR_INK_MUTED}" font-size="11.5" font-weight="600" letter-spacing="1.5">FULLSTACK &amp; AUDIO ENGINEER · CREATOR OF SVARIX</text>',
+        f'  </g>',
         '',
         '  <!-- Name Headings -->',
-        f'  <g class="hero-elem" style="animation-delay: {"0s" if IS_STATIC else "0.15s"};" transform="translate(42, 140)">',
-        f'    <text class="serif" font-size="82" font-weight="400" fill="{COLOR_INK}">Aryan</text>',
-        f'    <text class="serif" y="82" font-size="82" font-weight="400" fill="{COLOR_INK}">Gup<tspan fill="{COLOR_SKY}" font-style="italic">ta</tspan></text>',
-        '  </g>',
+        f'  <g class="hero-name">',
+        f'    <text class="serif" x="42" y="132" font-size="78" font-weight="400" fill="{COLOR_INK}">Aryan</text>',
+        f'    <text class="serif" x="42" y="208" font-size="78" font-weight="400" fill="{COLOR_INK}">Gup<tspan fill="{COLOR_SKY}" font-style="italic">ta</tspan></text>',
+        f'  </g>',
         '',
-        '  <!-- One line about me -->',
-        f'  <g class="hero-elem" style="animation-delay: {"0s" if IS_STATIC else "0.25s"};" transform="translate(42, 276)">',
-        f'    <text class="brico" font-size="15.5" font-weight="500" fill="{COLOR_INK_MUTED}">',
-        '      <tspan x="0" y="0">Building things that don\'t break at 3 AM.</tspan>',
-        '      <tspan x="0" y="24">Solo developer &amp; CS student who builds with AI and ships anyway.</tspan>',
-        '    </text>',
-        f'    <text class="geist" x="0" y="56" font-size="12.5" font-weight="600" fill="{COLOR_SKY}">aryangupta.dev ↗</text>',
-        '  </g>',
+        '  <!-- Bio & Subline -->',
+        f'  <g class="hero-bio">',
+        f'    <text class="brico" x="42" y="260" font-size="15" font-weight="500" fill="{COLOR_INK_MUTED}">Building things that don\'t break at 3 AM.</text>',
+        f'    <text class="brico" x="42" y="284" font-size="15" font-weight="500" fill="{COLOR_INK_MUTED}">Solo developer &amp; CS student who builds with AI and ships anyway.</text>',
+        f'    <text class="geist" x="42" y="318" font-size="13" font-weight="600" fill="{COLOR_SKY}">aryangupta.dev ↗</text>',
+        f'  </g>',
         '',
-        '  <!-- ASCII Stipple Portrait -->'
+        '  <!-- High-Density Silhouette ASCII Portrait -->'
     ]
 
     start_x = 510
-    start_y = 62
-    step_y = 11.2
+    start_y = 36
+    step_y = 8.1
 
     for idx, r in enumerate(ascii_rows):
-        d = "0s" if IS_STATIC else f"{round(0.10 + idx * 0.024, 3)}s"
+        d = "0s" if IS_STATIC else f"{round(0.08 + idx * 0.012, 3)}s"
         esc = html.escape(r)
         svg.append(
-            f'  <text class="geist ascii-row" x="{start_x}" y="{start_y + idx * step_y}" fill="{COLOR_INK}" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: {d};">{esc}</text>'
+            f'  <text class="geist ascii-row" x="{start_x}" y="{round(start_y + idx * step_y, 1)}" fill="{COLOR_INK}" font-size="7.6" font-weight="600" xml:space="preserve" style="animation-delay: {d};">{esc}</text>'
         )
 
     svg.append('</svg>')
@@ -452,11 +444,11 @@ def render_tiles():
         font_css = build_font_css(corpus)
         
         anim_css = "" if IS_STATIC else f"""
-        @keyframes tilePop {{
-          0% {{ opacity: 0; transform: scale(0.96) translateY(6px); }}
-          100% {{ opacity: 1; transform: scale(1) translateY(0); }}
+        @keyframes tileFadeIn {{
+          0% {{ opacity: 0; }}
+          100% {{ opacity: 1; }}
         }}
-        .tile-card {{ opacity: 0; animation: tilePop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }}
+        .tile-card {{ opacity: 0; animation: tileFadeIn 0.4s ease-out forwards; }}
         """
 
         svg = [
@@ -503,11 +495,11 @@ def render_monthly_activity(contrib_data):
       0% { transform: scaleY(0); }
       100% { transform: scaleY(1); }
     }
-    @keyframes cardFadeIn {
-      0% { opacity: 0; transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
-    .fade-elem { opacity: 0; animation: cardFadeIn 0.4s ease-out forwards; }
+    .fade-elem { opacity: 0; animation: fadeIn 0.4s ease-out forwards; }
     .chart-bar { transform-origin: bottom; animation: barRise 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     """
 
@@ -520,10 +512,10 @@ def render_monthly_activity(contrib_data):
         f'  <rect x="1" y="1" width="918" height="278" rx="20" fill="{COLOR_PAPER}" stroke="{COLOR_LINE}" stroke-width="1.5" />',
         '',
         '  <!-- Header -->',
-        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "0.95s"};" transform="translate(42, 42)">',
-        f'    <text class="geist" fill="{COLOR_INK_MUTED}" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>',
-        f'    <text class="serif" y="44" font-size="44" fill="{COLOR_INK}">{total_contribs:,} <tspan font-style="italic">contributions</tspan></text>',
-        '  </g>',
+        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "0.95s"};">',
+        f'    <text class="geist" x="42" y="46" fill="{COLOR_INK_MUTED}" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>',
+        f'    <text class="serif" x="42" y="90" font-size="44" fill="{COLOR_INK}">{total_contribs:,} <tspan font-style="italic">contributions</tspan></text>',
+        f'  </g>',
         '',
         '  <!-- Bar Chart -->'
     ]
@@ -554,23 +546,22 @@ def render_monthly_activity(contrib_data):
                 f'  <text class="geist fade-elem" x="{x + bar_w/2}" y="{y - 8}" text-anchor="middle" fill="{COLOR_SKY}" font-size="11" font-weight="700" style="animation-delay: {"0s" if IS_STATIC else "1.35s"};">{m["count"]}</text>'
             )
 
-    # Right side divider & stats
     svg.extend([
         '',
         f'  <line x1="600" y1="40" x2="600" y2="240" stroke="{COLOR_LINE}" stroke-width="1.5" />',
         '',
-        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.20s"};" transform="translate(640, 55)">',
-        f'    <text class="serif" font-size="34" fill="{COLOR_INK}">{streak} <tspan font-style="italic">days</tspan></text>',
-        f'    <text class="brico" y="24" font-size="12.5" fill="{COLOR_INK_MUTED}">current streak, and the longest</text>',
-        '  </g>',
-        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.25s"};" transform="translate(640, 130)">',
-        f'    <text class="serif" font-size="34" fill="{COLOR_INK}">{active_days} <tspan font-size="24" fill="{COLOR_INK_MUTED}">/ {total_days}</tspan></text>',
-        f'    <text class="brico" y="24" font-size="12.5" fill="{COLOR_INK_MUTED}">days with a commit</text>',
-        '  </g>',
-        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.30s"};" transform="translate(640, 205)">',
-        f'    <text class="serif" font-size="34" fill="{COLOR_INK}">{busiest_count}</text>',
-        f'    <text class="brico" y="24" font-size="12.5" fill="{COLOR_INK_MUTED}">on the busiest day</text>',
-        '  </g>',
+        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.20s"};">',
+        f'    <text class="serif" x="640" y="78" font-size="34" fill="{COLOR_INK}">{streak} <tspan font-style="italic">days</tspan></text>',
+        f'    <text class="brico" x="640" y="102" font-size="12.5" fill="{COLOR_INK_MUTED}">current streak, and the longest</text>',
+        f'  </g>',
+        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.25s"};">',
+        f'    <text class="serif" x="640" y="154" font-size="34" fill="{COLOR_INK}">{active_days} <tspan font-size="24" fill="{COLOR_INK_MUTED}">/ {total_days}</tspan></text>',
+        f'    <text class="brico" x="640" y="178" font-size="12.5" fill="{COLOR_INK_MUTED}">days with a commit</text>',
+        f'  </g>',
+        f'  <g class="fade-elem" style="animation-delay: {"0s" if IS_STATIC else "1.30s"};">',
+        f'    <text class="serif" x="640" y="228" font-size="34" fill="{COLOR_INK}">{busiest_count}</text>',
+        f'    <text class="brico" x="640" y="252" font-size="12.5" fill="{COLOR_INK_MUTED}">on the busiest day</text>',
+        f'  </g>',
         '</svg>'
     ])
 
@@ -620,11 +611,11 @@ def render_repo_cards():
         font_css = build_font_css(corpus)
 
         anim_css = "" if IS_STATIC else f"""
-        @keyframes repoPop {{
-          0% {{ opacity: 0; transform: translateY(6px); }}
-          100% {{ opacity: 1; transform: translateY(0); }}
+        @keyframes repoFadeIn {{
+          0% {{ opacity: 0; }}
+          100% {{ opacity: 1; }}
         }}
-        .repo-card {{ opacity: 0; animation: repoPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }}
+        .repo-card {{ opacity: 0; animation: repoFadeIn 0.4s ease-out forwards; }}
         """
 
         svg = [
@@ -692,9 +683,9 @@ def render_contribution_graph(contrib_data):
         f'  <rect x="1" y="1" width="918" height="188" rx="20" fill="{COLOR_PAPER}" stroke="{COLOR_LINE}" stroke-width="1.5" />',
         '',
         '  <!-- Title Bar -->',
-        '  <g transform="translate(42, 44)">',
-        f'    <text class="serif" font-size="28" fill="{COLOR_INK}">Every day, <tspan fill="{COLOR_SKY}" font-style="italic">in blue</tspan></text>',
-        f'    <text class="geist" x="836" y="-6" text-anchor="end" fill="{COLOR_INK_MUTED}" font-size="11" font-weight="600" letter-spacing="1.5">REFRESHED DAILY</text>',
+        '  <g>',
+        f'    <text class="serif" x="42" y="44" font-size="28" fill="{COLOR_INK}">Every day, <tspan fill="{COLOR_SKY}" font-style="italic">in blue</tspan></text>',
+        f'    <text class="geist" x="878" y="38" text-anchor="end" fill="{COLOR_INK_MUTED}" font-size="11" font-weight="600" letter-spacing="1.5">REFRESHED DAILY</text>',
         '  </g>',
         '',
         '  <!-- 53-Week Grid -->'

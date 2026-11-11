@@ -49,9 +49,9 @@
   <rect x="1" y="1" width="918" height="188" rx="20" fill="#FFF8EC" stroke="rgba(19, 35, 58, 0.12)" stroke-width="1.5" />
 
   <!-- Title Bar -->
-  <g transform="translate(42, 44)">
-    <text class="serif" font-size="28" fill="#13233A">Every day, <tspan fill="#2F7FD8" font-style="italic">in blue</tspan></text>
-    <text class="geist" x="836" y="-6" text-anchor="end" fill="#4B5D72" font-size="11" font-weight="600" letter-spacing="1.5">REFRESHED DAILY</text>
+  <g>
+    <text class="serif" x="42" y="44" font-size="28" fill="#13233A">Every day, <tspan fill="#2F7FD8" font-style="italic">in blue</tspan></text>
+    <text class="geist" x="878" y="38" text-anchor="end" fill="#4B5D72" font-size="11" font-weight="600" letter-spacing="1.5">REFRESHED DAILY</text>
   </g>
 
   <!-- 53-Week Grid -->
