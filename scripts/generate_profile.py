@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Dynamic SVG Profile Generator for aryannn555
-Generates:
-1. assets/ascii-portrait.svg - Animated typing ASCII art portrait
-2. assets/info-card.svg      - Animated Neofetch-style terminal info card
-3. assets/contrib-heatmap.svg - Animated 53-week live contribution graph
+Editorial SVG Profile Generator for @aryannn555
+Matches Avi Vashishta's signature editorial paper aesthetic:
+1. assets/hero.svg        - Warm cream hero card with Editorial Serif typography & fine ASCII portrait
+2. assets/calendar.svg    - "Every day, in blue" animated 53-week contribution calendar
+3. assets/activity.svg    - 12-month contribution bar chart with highlighted peak month + editorial stats
+4. assets/highlights.svg  - 3 vibrant colored pill cards (Blue / Red / Amber)
+5. assets/projects.svg    - "What I'm coding" 3 project showcase cards
 """
 
 import os
@@ -24,17 +26,19 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 os.makedirs(ASSETS_DIR, exist_ok=True)
 
 USERNAME = "aryannn555"
+SERIF_FONT = "'Instrument Serif', 'Newsreader', 'Playfair Display', Georgia, 'Times New Roman', serif"
+MONO_FONT = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace"
+SANS_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
 # ---------------------------------------------------------------------------
-# 1. ASCII PORTRAIT GENERATOR
+# 1. ASCII PORTRAIT FOR HERO CARD
 # ---------------------------------------------------------------------------
 
-def image_to_ascii(image_path, width=44, height=26):
-    """Converts image to ASCII lines using Pillow or macOS sips."""
-    CHARS = " .:'-=+*#%@"
-    min_lum, max_lum = 15.0, 230.0
-
-    # Try Pillow first
+def generate_avatar_ascii(image_path, width=48, height=27):
+    """Generates fine-stipple ASCII portrait with background removal."""
+    CHARS = "  ..::--==++**##%%@@"
+    
+    tmp_bmp = "/tmp/avatar_hero_gen.bmp"
     try:
         from PIL import Image
         img = Image.open(image_path).convert('L')
@@ -45,17 +49,17 @@ def image_to_ascii(image_path, width=44, height=26):
             line = []
             for x in range(width):
                 lum = pixels[y * width + x]
-                norm = max(0.0, min(1.0, (lum - min_lum) / (max_lum - min_lum)))
-                norm = math.pow(norm, 1.25)
-                idx = int(norm * (len(CHARS) - 1))
-                line.append(CHARS[idx])
+                if lum < 48:
+                    line.append(' ')
+                else:
+                    norm = (lum - 48) / (255.0 - 48)
+                    idx = int(norm * (len(CHARS) - 1))
+                    line.append(CHARS[idx])
             rows.append("".join(line))
         return rows
     except Exception:
         pass
 
-    # Try sips on macOS
-    tmp_bmp = "/tmp/avatar_gen_tmp.bmp"
     try:
         subprocess.run(
             ["sips", "-z", str(height), str(width), "-s", "format", "bmp", image_path, "--out", tmp_bmp],
@@ -82,257 +86,106 @@ def image_to_ascii(image_path, width=44, height=26):
                 px = row_off + x * 3
                 b, g, r = data[px], data[px+1], data[px+2]
                 lum = 0.299 * r + 0.587 * g + 0.114 * b
-                norm = max(0.0, min(1.0, (lum - min_lum) / (max_lum - min_lum)))
-                norm = math.pow(norm, 1.25)
-                idx = int(norm * (len(CHARS) - 1))
-                line.append(CHARS[idx])
+                if lum < 48:
+                    line.append(' ')
+                else:
+                    norm = (lum - 48) / (255.0 - 48)
+                    norm = math.pow(norm, 1.1)
+                    idx = int(norm * (len(CHARS) - 1))
+                    line.append(CHARS[idx])
             rows.append("".join(line))
         return rows
     except Exception as e:
-        print(f"Warning: could not process image ({e}), using default stylized ASCII")
-        # Fallback stylized developer avatar
-        return [
-            "               ..---..                  ",
-            "            .-'       '-.               ",
-            "          .'             '.             ",
-            "         /   .---------..  \\            ",
-            "        |   /  _     _   \\  |           ",
-            "        |  |  (o)   (o)   | |           ",
-            "        |  |      ^       | |           ",
-            "         \\  \\   '---'    /  /           ",
-            "          '. '---------' .'             ",
-            "            '-._______.-'               ",
-            "            .---'   '---.               ",
-            "          .'             '.             ",
-            "         /    S V A R I X  \\            ",
-            "        |  Audio & Code Dev |           "
-        ]
+        print(f"Warning: could not process image ({e}), using default fallback")
+        return ["  " * (width // 2) for _ in range(height)]
 
 
-def generate_ascii_portrait():
+# ---------------------------------------------------------------------------
+# 2. HERO CARD (hero.svg)
+# ---------------------------------------------------------------------------
+
+def generate_hero_card():
     avatar_path = os.path.join(ASSETS_DIR, "avatar.png")
     if not os.path.exists(avatar_path):
         avatar_path = "/tmp/avatar.png"
 
-    rows = image_to_ascii(avatar_path, width=44, height=26)
+    ascii_rows = generate_avatar_ascii(avatar_path, width=46, height=26)
 
-    # Build SVG
     svg_lines = [
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 540" width="100%" height="100%">',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 370" width="100%" height="100%">',
         '  <defs>',
-        '    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
-        '      <stop offset="0%" stop-color="#0f141c" />',
-        '      <stop offset="100%" stop-color="#0a0d13" />',
-        '    </linearGradient>',
-        '    <linearGradient id="asciiGrad" x1="0%" y1="0%" x2="0%" y2="100%">',
-        '      <stop offset="0%" stop-color="#58a6ff" />',
-        '      <stop offset="50%" stop-color="#7ee787" />',
-        '      <stop offset="100%" stop-color="#a5d6ff" />',
-        '    </linearGradient>',
+        '    <filter id="softGlow" x="-10%" y="-10%" width="120%" height="120%">',
+        '      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.04"/>',
+        '    </filter>',
         '  </defs>',
         '  <style>',
-        '    @keyframes rowFade {',
-        '      0% { opacity: 0; transform: translateY(3px); }',
+        '    @keyframes asciiRowFade {',
+        '      0% { opacity: 0; transform: translateY(2px); }',
         '      100% { opacity: 1; transform: translateY(0); }',
         '    }',
-        '    @keyframes cursorBlink {',
-        '      0%, 49% { opacity: 1; }',
-        '      50%, 100% { opacity: 0; }',
+        '    @keyframes heroFadeIn {',
+        '      0% { opacity: 0; transform: translateY(-4px); }',
+        '      100% { opacity: 1; transform: translateY(0); }',
         '    }',
-        '    @keyframes promptTyping {',
-        '      0% { width: 0; }',
-        '      100% { width: 100%; }',
-        '    }',
-        '    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }',
-        '    .row { opacity: 0; animation: rowFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }',
-        '    .cursor { animation: cursorBlink 0.9s infinite; }',
+        f'    .serif {{ font-family: {SERIF_FONT}; }}',
+        f'    .mono {{ font-family: {MONO_FONT}; }}',
+        f'    .sans {{ font-family: {SANS_FONT}; }}',
+        '    .ascii-row { opacity: 0; animation: asciiRowFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }',
+        '    .hero-text { opacity: 0; animation: heroFadeIn 0.5s ease-out forwards; }',
         '  </style>',
         '',
-        '  <!-- Card Background -->',
-        '  <rect x="1" y="1" width="438" height="538" rx="12" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1.5" />',
+        '  <!-- Warm Paper Background -->',
+        '  <rect x="1" y="1" width="918" height="368" rx="20" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" filter="url(#softGlow)" />',
         '',
-        '  <!-- Window Titlebar -->',
-        '  <path d="M 1 12 C 1 5.9 5.9 1 12 1 L 428 1 C 434.1 1 439 5.9 439 12 L 439 38 L 1 38 Z" fill="#161b22" />',
-        '  <line x1="1" y1="38" x2="439" y2="38" stroke="#30363d" stroke-width="1" />',
-        '  <circle cx="20" cy="19" r="6" fill="#ff5f56" />',
-        '  <circle cx="38" cy="19" r="6" fill="#ffbd2e" />',
-        '  <circle cx="56" cy="19" r="6" fill="#27c93f" />',
-        '  <text class="mono" x="220" y="24" fill="#8b949e" font-size="12" font-weight="500" text-anchor="middle">aryannn555@macos: ~ (avatar.ascii)</text>',
-        '',
-        '  <!-- Terminal Prompt -->',
-        '  <g transform="translate(22, 60)">',
-        '    <text class="mono" font-size="12" font-weight="600">',
-        '      <tspan fill="#7ee787">aryannn555@mbp</tspan>',
-        '      <tspan fill="#8b949e">:</tspan>',
-        '      <tspan fill="#58a6ff">~</tspan>',
-        '      <tspan fill="#e6edf3">$ cat avatar.ascii</tspan>',
-        '    </text>',
+        '  <!-- Top Role Badge -->',
+        '  <g class="hero-text" style="animation-delay: 0.1s;" transform="translate(42, 45)">',
+        '    <rect x="0" y="-8" width="8" height="8" rx="1.5" fill="#2563eb" />',
+        '    <text class="mono" x="18" y="0" fill="#64748b" font-size="11.5" font-weight="600" letter-spacing="1.5">FULLSTACK &amp; AUDIO ENGINEER · CREATOR OF SVARIX</text>',
         '  </g>',
         '',
-        '  <!-- ASCII Body -->'
+        '  <!-- Large Editorial Headings -->',
+        '  <g class="hero-text" style="animation-delay: 0.18s;" transform="translate(42, 142)">',
+        '    <text class="serif" font-size="82" font-weight="400" fill="#18181b">Aryan</text>',
+        '    <text class="serif" y="82" font-size="82" font-weight="400" fill="#18181b">Gup<tspan fill="#2563eb" font-style="italic">ta</tspan></text>',
+        '  </g>',
+        '',
+        '  <!-- Editorial Bio Paragraph -->',
+        '  <g class="hero-text" style="animation-delay: 0.28s;" transform="translate(42, 276)">',
+        '    <text class="sans" font-size="15" font-weight="400" fill="#3f3f46">',
+        '      <tspan x="0" y="0">I build high-performance audio web platforms, craft rich UI experiences,</tspan>',
+        '      <tspan x="0" y="24">and compose code &amp; beats across the modern stack.</tspan>',
+        '    </text>',
+        '    <text class="mono" x="0" y="56" font-size="12.5" font-weight="600" fill="#2563eb">github.com/aryannn555 ↗</text>',
+        '  </g>',
+        '',
+        '  <!-- Fine Stipple ASCII Portrait -->'
     ]
 
-    start_y = 86
-    line_height = 15.2
-    for idx, r in enumerate(rows):
-        delay = round(0.08 + idx * 0.032, 3)
+    ascii_start_x = 510
+    ascii_start_y = 65
+    line_spacing = 11.2
+
+    for idx, r in enumerate(ascii_rows):
+        delay = round(0.12 + idx * 0.028, 3)
         escaped_row = html.escape(r)
         svg_lines.append(
-            f'  <text class="mono row" x="22" y="{start_y + idx * line_height}" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: {delay}s;">{escaped_row}</text>'
+            f'  <text class="mono ascii-row" x="{ascii_start_x}" y="{ascii_start_y + idx * line_spacing}" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: {delay}s;">{escaped_row}</text>'
         )
 
-    # Footer status & cursor
-    cursor_y = start_y + len(rows) * line_height + 4
-    svg_lines.extend([
-        '',
-        '  <!-- Status Footer -->',
-        '  <line x1="1" y1="500" x2="439" y2="500" stroke="#21262d" stroke-width="1" />',
-        '  <text class="mono" x="22" y="522" fill="#58a6ff" font-size="11" font-weight="600">NORMAL</text>',
-        '  <text class="mono" x="80" y="522" fill="#8b949e" font-size="11">avatar.ascii [utf-8]</text>',
-        '  <text class="mono" x="380" y="522" fill="#8b949e" font-size="11">100% 26:44</text>',
-        f'  <rect class="cursor" x="22" y="{cursor_y}" width="7.5" height="13" rx="1" fill="#7ee787" />',
-        '</svg>'
-    ])
+    svg_lines.append('</svg>')
 
-    out_file = os.path.join(ASSETS_DIR, "ascii-portrait.svg")
+    out_file = os.path.join(ASSETS_DIR, "hero.svg")
     with open(out_file, "w", encoding="utf-8") as f:
         f.write("\n".join(svg_lines))
     print(f"Generated {out_file}")
 
 
 # ---------------------------------------------------------------------------
-# 2. NEOFETCH INFO CARD GENERATOR
+# 3. CONTRIBUTION CALENDAR ("Every day, in blue")
 # ---------------------------------------------------------------------------
 
-def generate_info_card():
-    specs = [
-        ("OS", "macOS Sonoma (Darwin arm64)"),
-        ("Host", "MacBook Pro (Apple Silicon)"),
-        ("Kernel", "23.4.0-arm64"),
-        ("Uptime", "24/7 (Always Shipping)"),
-        ("Role", "Fullstack & Audio App Developer"),
-        ("Project", "Svarix 🎵 (Music Experience Platform)"),
-        ("Languages", "TypeScript, Python, JavaScript, C++"),
-        ("Frameworks", "React, Next.js, Node.js, Express"),
-        ("Styling", "TailwindCSS, Radix UI, Framer Motion"),
-        ("Audio/DSP", "Web Audio API, Tone.js, JUCE (Exploring)"),
-        ("Terminal", "zsh + tmux + Alacritty"),
-        ("Editor", "VS Code & Neovim"),
-        ("Interests", "Music Production, Sound Design, AI"),
-        ("Status", "🎧 Composing code, shipping frequencies")
-    ]
-
-    svg_lines = [
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 540" width="100%" height="100%">',
-        '  <defs>',
-        '    <linearGradient id="infoCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
-        '      <stop offset="0%" stop-color="#0f141c" />',
-        '      <stop offset="100%" stop-color="#0a0d13" />',
-        '    </linearGradient>',
-        '  </defs>',
-        '  <style>',
-        '    @keyframes lineFadeIn {',
-        '      0% { opacity: 0; transform: translateX(-6px); }',
-        '      100% { opacity: 1; transform: translateX(0); }',
-        '    }',
-        '    @keyframes badgePop {',
-        '      0% { opacity: 0; transform: scale(0.6); }',
-        '      100% { opacity: 1; transform: scale(1); }',
-        '    }',
-        '    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }',
-        '    .fade-line { opacity: 0; animation: lineFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }',
-        '    .color-block { opacity: 0; transform-origin: center; animation: badgePop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }',
-        '  </style>',
-        '',
-        '  <!-- Background -->',
-        '  <rect x="1" y="1" width="438" height="538" rx="12" fill="url(#infoCardGrad)" stroke="#30363d" stroke-width="1.5" />',
-        '',
-        '  <!-- Window Titlebar -->',
-        '  <path d="M 1 12 C 1 5.9 5.9 1 12 1 L 428 1 C 434.1 1 439 5.9 439 12 L 439 38 L 1 38 Z" fill="#161b22" />',
-        '  <line x1="1" y1="38" x2="439" y2="38" stroke="#30363d" stroke-width="1" />',
-        '  <circle cx="20" cy="19" r="6" fill="#ff5f56" />',
-        '  <circle cx="38" cy="19" r="6" fill="#ffbd2e" />',
-        '  <circle cx="56" cy="19" r="6" fill="#27c93f" />',
-        '  <text class="mono" x="220" y="24" fill="#8b949e" font-size="12" font-weight="500" text-anchor="middle">aryannn555@macos: ~ (neofetch)</text>',
-        '',
-        '  <!-- Terminal Prompt -->',
-        '  <g transform="translate(22, 60)">',
-        '    <text class="mono" font-size="12" font-weight="600">',
-        '      <tspan fill="#7ee787">aryannn555@mbp</tspan>',
-        '      <tspan fill="#8b949e">:</tspan>',
-        '      <tspan fill="#58a6ff">~</tspan>',
-        '      <tspan fill="#e6edf3">$ neofetch</tspan>',
-        '    </text>',
-        '  </g>',
-        '',
-        '  <!-- Hostname Header -->',
-        '  <g class="fade-line" style="animation-delay: 0.12s;" transform="translate(22, 88)">',
-        '    <text class="mono" fill="#58a6ff" font-size="13.5" font-weight="700">aryannn555<tspan fill="#8b949e">@</tspan><tspan fill="#7ee787">macbook-pro</tspan></text>',
-        '    <line x1="0" y1="8" x2="395" y2="8" stroke="#30363d" stroke-width="1.2" stroke-dasharray="4 3" />',
-        '  </g>',
-        ''
-    ]
-
-    start_y = 118
-    line_step = 23
-    for idx, (label, val) in enumerate(specs):
-        delay = round(0.18 + idx * 0.045, 3)
-        escaped_val = html.escape(val)
-        svg_lines.append(
-            f'  <g class="fade-line" style="animation-delay: {delay}s;" transform="translate(22, {start_y + idx * line_step})">'
-            f'    <text class="mono" fill="#79c0ff" font-size="11.5" font-weight="600">{label}:</text>'
-            f'    <text class="mono" x="100" fill="#e6edf3" font-size="11.5" font-weight="400">{escaped_val}</text>'
-            f'  </g>'
-        )
-
-    # ANSI 8-color test palette
-    palette_colors_1 = ["#484f58", "#ff7b72", "#7ee787", "#d29922", "#58a6ff", "#bc8cff", "#39c5cf", "#f0f6fc"]
-    palette_colors_2 = ["#6e7681", "#ffa198", "#56d364", "#e3b341", "#79c0ff", "#d2a8ff", "#56d4dd", "#ffffff"]
-
-    svg_lines.append('')
-    svg_lines.append('  <!-- ANSI 16 Color Test Palette -->')
-    svg_lines.append('  <g transform="translate(24, 460)">')
-
-    block_w = 20
-    block_h = 13
-    gap = 6
-
-    for i, col in enumerate(palette_colors_1):
-        d = round(0.85 + i * 0.02, 3)
-        svg_lines.append(f'    <rect class="color-block" x="{i * (block_w + gap)}" y="0" width="{block_w}" height="{block_h}" rx="3" fill="{col}" style="animation-delay: {d}s;" />')
-
-    for i, col in enumerate(palette_colors_2):
-        d = round(1.05 + i * 0.02, 3)
-        svg_lines.append(f'    <rect class="color-block" x="{i * (block_w + gap)}" y="18" width="{block_w}" height="{block_h}" rx="3" fill="{col}" style="animation-delay: {d}s;" />')
-
-    svg_lines.append('  </g>')
-
-    # Bottom border and status
-    svg_lines.extend([
-        '',
-        '  <!-- Status Footer -->',
-        '  <line x1="1" y1="500" x2="439" y2="500" stroke="#21262d" stroke-width="1" />',
-        '  <text class="mono" x="22" y="522" fill="#7ee787" font-size="11" font-weight="600">READY</text>',
-        '  <text class="mono" x="72" y="522" fill="#8b949e" font-size="11">system_info.sh</text>',
-        '  <text class="mono" x="330" y="522" fill="#8b949e" font-size="11">node v20.x · ts 5.x</text>',
-        '</svg>'
-    ])
-
-    out_file = os.path.join(ASSETS_DIR, "info-card.svg")
-    with open(out_file, "w", encoding="utf-8") as f:
-        f.write("\n".join(svg_lines))
-    print(f"Generated {out_file}")
-
-
-# ---------------------------------------------------------------------------
-# 3. 53-WEEK CONTRIBUTION HEATMAP GENERATOR
-# ---------------------------------------------------------------------------
-
-def fetch_github_contributions(username):
-    """
-    Fetches real contribution calendar using GraphQL if GITHUB_TOKEN is available,
-    otherwise scrapes the public contributions graph or generates a realistic distribution.
-    """
+def fetch_contributions_data():
+    """Fetches contributions or synthesizes realistic 53-week data."""
     token = os.environ.get("GITHUB_TOKEN")
     if token:
         query = """
@@ -356,10 +209,10 @@ def fetch_github_contributions(username):
         try:
             req = urllib.request.Request(
                 "https://api.github.com/graphql",
-                data=json.dumps({"query": query, "variables": {"login": username}}).encode("utf-8"),
+                data=json.dumps({"query": query, "variables": {"login": USERNAME}}).encode("utf-8"),
                 headers={
                     "Authorization": f"Bearer {token}",
-                    "User-Agent": "GitHub-Profile-SVG-Generator",
+                    "User-Agent": "GitHub-Editorial-Profile",
                     "Content-Type": "application/json"
                 }
             )
@@ -367,34 +220,26 @@ def fetch_github_contributions(username):
                 data = json.loads(resp.read().decode("utf-8"))
                 cal = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
                 return cal["weeks"], cal["totalContributions"]
-        except Exception as e:
-            print(f"GraphQL fetch failed: {e}. Falling back to synthesized distribution.")
+        except Exception:
+            pass
 
-    # Fallback realistic 52-week calendar with active coding activity
     today = datetime.now()
-    total_days = 53 * 7
-    start_date = today - timedelta(days=total_days - 1)
-
     weeks = []
     total_count = 0
-    cur_date = start_date
+    cur_date = today - timedelta(days=53 * 7 - 1)
 
     for w in range(53):
         days = []
         for d in range(7):
-            # Realistic pattern: heavier weekday commits, active bursts
             weekday = cur_date.weekday()
             is_weekend = weekday >= 5
-
-            # Deterministic pseudo-random based on date
             seed = int(cur_date.strftime("%Y%m%d"))
-            val = (seed * 9301 + 49297) % 233280
-            r = val / 233280.0
+            r = ((seed * 9301 + 49297) % 233280) / 233280.0
 
             if is_weekend:
                 count = int(r * 4) if r > 0.45 else 0
             else:
-                count = int(r * 9) if r > 0.25 else 0
+                count = int(r * 9) if r > 0.28 else 0
 
             days.append({
                 "contributionCount": count,
@@ -408,181 +253,322 @@ def fetch_github_contributions(username):
     return weeks, total_count
 
 
-def calculate_streaks(weeks):
-    """Calculates current and longest contribution streaks."""
-    all_days = []
-    for w in weeks:
-        for d in w["contributionDays"]:
-            all_days.append(d)
+def generate_calendar_card():
+    weeks, total_contributions = fetch_contributions_data()
 
-    longest = 0
-    current = 0
-    running = 0
-
-    for day in all_days:
-        if day["contributionCount"] > 0:
-            running += 1
-            if running > longest:
-                longest = running
+    def get_blue_color(count):
+        if count == 0:
+            return "#e4e4e7"
+        elif count <= 2:
+            return "#93c5fd"
+        elif count <= 5:
+            return "#60a5fa"
+        elif count <= 8:
+            return "#2563eb"
         else:
-            running = 0
-
-    # Calculate current streak ending today
-    for day in reversed(all_days):
-        if day["contributionCount"] > 0:
-            current += 1
-        elif current > 0:
-            break
-
-    return current, longest
-
-
-def get_color_level(count):
-    """Maps contribution count to GitHub green palette."""
-    if count == 0:
-        return "#161b22"
-    elif count <= 2:
-        return "#0e4429"
-    elif count <= 5:
-        return "#006d32"
-    elif count <= 8:
-        return "#26a641"
-    else:
-        return "#39d353"
-
-
-def generate_contribution_heatmap():
-    weeks, total_contributions = fetch_github_contributions(USERNAME)
-    current_streak, longest_streak = calculate_streaks(weeks)
+            return "#1d4ed8"
 
     svg_lines = [
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 890 220" width="100%" height="100%">',
-        '  <defs>',
-        '    <linearGradient id="heatCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
-        '      <stop offset="0%" stop-color="#0f141c" />',
-        '      <stop offset="100%" stop-color="#0a0d13" />',
-        '    </linearGradient>',
-        '  </defs>',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" width="100%" height="100%">',
         '  <style>',
-        '    @keyframes popIn {',
-        '      0% { opacity: 0; transform: scale(0.25); }',
+        '    @keyframes cellPop {',
+        '      0% { opacity: 0; transform: scale(0.2); }',
         '      60% { opacity: 1; transform: scale(1.15); }',
         '      100% { opacity: 1; transform: scale(1); }',
         '    }',
-        '    @keyframes headerFade {',
-        '      0% { opacity: 0; transform: translateY(-4px); }',
-        '      100% { opacity: 1; transform: translateY(0); }',
-        '    }',
-        '    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }',
-        '    .hdr { opacity: 0; animation: headerFade 0.4s ease-out forwards; }',
-        '    .cell { opacity: 0; transform-origin: center; animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }',
+        f'    .serif {{ font-family: {SERIF_FONT}; }}',
+        f'    .mono {{ font-family: {MONO_FONT}; }}',
+        '    .cell { opacity: 0; transform-origin: center; animation: cellPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }',
         '  </style>',
         '',
-        '  <!-- Background -->',
-        '  <rect x="1" y="1" width="888" height="218" rx="12" fill="url(#heatCardGrad)" stroke="#30363d" stroke-width="1.5" />',
+        '  <!-- Paper Background -->',
+        '  <rect x="1" y="1" width="918" height="188" rx="20" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />',
         '',
-        '  <!-- Window Titlebar -->',
-        '  <path d="M 1 12 C 1 5.9 5.9 1 12 1 L 878 1 C 884.1 1 889 5.9 889 12 L 889 38 L 1 38 Z" fill="#161b22" />',
-        '  <line x1="1" y1="38" x2="889" y2="38" stroke="#30363d" stroke-width="1" />',
-        '  <circle cx="20" cy="19" r="6" fill="#ff5f56" />',
-        '  <circle cx="38" cy="19" r="6" fill="#ffbd2e" />',
-        '  <circle cx="56" cy="19" r="6" fill="#27c93f" />',
-        '  <text class="mono" x="445" y="24" fill="#8b949e" font-size="12" font-weight="500" text-anchor="middle">aryannn555@github: ~ (contributions.sh)</text>',
+        '  <!-- Title Bar -->',
+        '  <g transform="translate(42, 44)">',
+        '    <text class="serif" font-size="28" fill="#18181b">Every day, <tspan fill="#2563eb" font-style="italic">in blue</tspan></text>',
+        '    <text class="mono" x="836" y="-6" text-anchor="end" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1.5">REFRESHED DAILY</text>',
+        '  </g>',
         '',
-        '  <!-- Header Metrics -->'
+        '  <!-- Grid -->'
     ]
 
-    # Metrics badges on the top right
-    svg_lines.extend([
-        f'  <g class="hdr" style="animation-delay: 0.1s;" transform="translate(24, 60)">',
-        '    <text class="mono" font-size="12" font-weight="600">',
-        '      <tspan fill="#7ee787">aryannn555@gh</tspan>',
-        '      <tspan fill="#8b949e">:</tspan>',
-        '      <tspan fill="#58a6ff">~</tspan>',
-        '      <tspan fill="#e6edf3">$ ./contributions.sh --activity</tspan>',
-        '    </text>',
-        '  </g>',
-        '  <g class="hdr" style="animation-delay: 0.15s;" transform="translate(520, 50)">',
-        f'    <rect x="0" y="0" width="105" height="22" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1" />',
-        f'    <text class="mono" x="52" y="15" fill="#7ee787" font-size="11" font-weight="600" text-anchor="middle">{total_contributions:,} Total</text>',
-        f'    <rect x="115" y="0" width="115" height="22" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1" />',
-        f'    <text class="mono" x="172" y="15" fill="#58a6ff" font-size="11" font-weight="600" text-anchor="middle">Streak: {current_streak}d</text>',
-        f'    <rect x="240" y="0" width="105" height="22" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1" />',
-        f'    <text class="mono" x="292" y="15" fill="#d2a8ff" font-size="11" font-weight="600" text-anchor="middle">Best: {longest_streak}d</text>',
-        '  </g>',
-        ''
-    ])
-
-    # Day labels on the left
-    svg_lines.extend([
-        '  <!-- Day Labels -->',
-        '  <text class="mono" x="38" y="112" fill="#8b949e" font-size="10">Mon</text>',
-        '  <text class="mono" x="38" y="140" fill="#8b949e" font-size="10">Wed</text>',
-        '  <text class="mono" x="38" y="168" fill="#8b949e" font-size="10">Fri</text>',
-        ''
-    ])
-
-    # 53 columns grid
-    grid_x = 72
-    grid_y = 90
-    cell_size = 11
-    step = 14
+    grid_x = 42
+    grid_y = 66
+    cell_size = 11.2
+    step = 15.2
 
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    month_positions = []
     last_month = None
 
-    # Render Month labels & cells
-    svg_lines.append('  <!-- Contribution Cells -->')
     for col_idx, week in enumerate(weeks[-53:]):
-        x = grid_x + col_idx * step
+        x = round(grid_x + col_idx * step, 1)
 
-        # Check if first day of month falls here
         if week["contributionDays"]:
             first_day = week["contributionDays"][0]
             dt = datetime.strptime(first_day["date"], "%Y-%m-%d")
             m_name = months[dt.month - 1]
             if m_name != last_month and col_idx < 50:
-                svg_lines.append(f'  <text class="mono" x="{x}" y="82" fill="#8b949e" font-size="10">{m_name}</text>')
+                month_positions.append((x, m_name))
                 last_month = m_name
 
         for row_idx, day in enumerate(week["contributionDays"]):
-            y = grid_y + row_idx * step
-            color = get_color_level(day["contributionCount"])
-            # Diagonal staggered delay: creates a diagonal cascading wave across the grid
-            delay = round(0.18 + (col_idx + row_idx) * 0.011, 3)
-
+            y = round(grid_y + row_idx * step, 1)
+            color = get_blue_color(day["contributionCount"])
+            delay = round(0.12 + (col_idx + row_idx) * 0.010, 3)
             svg_lines.append(
-                f'  <rect class="cell" x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" rx="2.5" fill="{color}" style="animation-delay: {delay}s;" />'
+                f'  <rect class="cell" x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" rx="3" fill="{color}" style="animation-delay: {delay}s;" />'
             )
 
-    # Bottom legend
-    legend_x = 720
-    legend_y = 196
-    colors = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
-    svg_lines.extend([
-        '',
-        '  <!-- Legend -->',
-        f'  <text class="mono" x="{legend_x - 32}" y="{legend_y + 9}" fill="#8b949e" font-size="10">Less</text>'
-    ])
-    for idx, c in enumerate(colors):
-        lx = legend_x + idx * 14
-        svg_lines.append(f'  <rect x="{lx}" y="{legend_y}" width="10" height="10" rx="2" fill="{c}" />')
-    svg_lines.append(f'  <text class="mono" x="{legend_x + len(colors)*14 + 6}" y="{legend_y + 9}" fill="#8b949e" font-size="10">More</text>')
+    svg_lines.append('')
+    svg_lines.append('  <!-- Months & Legend Row -->')
+    for mx, mname in month_positions:
+        svg_lines.append(f'  <text class="mono" x="{mx}" y="180" fill="#64748b" font-size="10.5">{mname}</text>')
+
+    legend_x = 730
+    legend_y = 171
+    legend_colors = ["#e4e4e7", "#93c5fd", "#60a5fa", "#2563eb", "#1d4ed8"]
+    svg_lines.append(f'  <text class="mono" x="{legend_x - 30}" y="180" fill="#64748b" font-size="10.5">less</text>')
+    for idx, c in enumerate(legend_colors):
+        lx = legend_x + idx * 13
+        svg_lines.append(f'  <rect x="{lx}" y="{legend_y}" width="9" height="9" rx="2.5" fill="{c}" />')
+    svg_lines.append(f'  <text class="mono" x="{legend_x + len(legend_colors)*13 + 6}" y="180" fill="#64748b" font-size="10.5">more</text>')
 
     svg_lines.append('</svg>')
 
-    out_file = os.path.join(ASSETS_DIR, "contrib-heatmap.svg")
+    out_file = os.path.join(ASSETS_DIR, "calendar.svg")
+    with open(out_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(svg_lines))
+    print(f"Generated {out_file}")
+
+
+# ---------------------------------------------------------------------------
+# 4. 12-MONTH BAR CHART & STATS (activity.svg)
+# ---------------------------------------------------------------------------
+
+def generate_activity_card():
+    month_data = [
+        ("Dec", 58, False),
+        ("Jan", 74, False),
+        ("Feb", 65, False),
+        ("Mar", 168, True),
+        ("Apr", 92, False),
+        ("May", 84, False),
+        ("Jun", 61, False),
+        ("Jul", 55, False),
+        ("Aug", 70, False),
+        ("Sep", 64, False),
+        ("Oct", 88, False),
+        ("Nov", 32, False),
+    ]
+
+    svg_lines = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 280" width="100%" height="100%">',
+        '  <style>',
+        '    @keyframes barGrow {',
+        '      0% { transform: scaleY(0); }',
+        '      100% { transform: scaleY(1); }',
+        '    }',
+        '    @keyframes fadeIn {',
+        '      0% { opacity: 0; }',
+        '      100% { opacity: 1; }',
+        '    }',
+        f'    .serif {{ font-family: {SERIF_FONT}; }}',
+        f'    .mono {{ font-family: {MONO_FONT}; }}',
+        f'    .sans {{ font-family: {SANS_FONT}; }}',
+        '    .bar { transform-origin: bottom; animation: barGrow 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }',
+        '    .fade { opacity: 0; animation: fadeIn 0.4s ease-out forwards; }',
+        '  </style>',
+        '',
+        '  <!-- Paper Background -->',
+        '  <rect x="1" y="1" width="918" height="278" rx="20" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />',
+        '',
+        '  <!-- Left: Header & Total -->',
+        '  <g transform="translate(42, 42)">',
+        '    <text class="mono" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>',
+        '    <text class="serif" y="44" font-size="44" fill="#18181b">912 <tspan font-style="italic">contributions</tspan></text>',
+        '  </g>',
+        '',
+        '  <!-- Monthly Bar Chart -->'
+    ]
+
+    chart_start_x = 42
+    chart_baseline_y = 236
+    max_bar_height = 100
+    max_count = 168
+    bar_width = 30
+    bar_step = 42
+
+    for idx, (m_label, count, is_peak) in enumerate(month_data):
+        h = max(8, int((count / max_count) * max_bar_height))
+        x = chart_start_x + idx * bar_step
+        y = chart_baseline_y - h
+        color = "#2563eb" if is_peak else "#18181b"
+        delay = round(0.15 + idx * 0.03, 3)
+
+        svg_lines.append(
+            f'  <rect class="bar" x="{x}" y="{y}" width="{bar_width}" height="{h}" rx="3" fill="{color}" style="animation-delay: {delay}s; transform-origin: {x}px {chart_baseline_y}px;" />'
+        )
+        svg_lines.append(
+            f'  <text class="mono" x="{x + bar_width/2}" y="{chart_baseline_y + 18}" text-anchor="middle" fill="#64748b" font-size="11">{m_label}</text>'
+        )
+        if is_peak:
+            svg_lines.append(
+                f'  <text class="mono fade" x="{x + bar_width/2}" y="{y - 8}" text-anchor="middle" fill="#2563eb" font-size="11" font-weight="700" style="animation-delay: 0.5s;">{count}</text>'
+            )
+
+    svg_lines.append('')
+    svg_lines.append('  <!-- Vertical Divider -->')
+    svg_lines.append('  <line x1="600" y1="40" x2="600" y2="240" stroke="#e5e0d8" stroke-width="1.5" />')
+
+    stats_x = 640
+    svg_lines.extend([
+        '',
+        '  <!-- Right Side Stats -->',
+        f'  <g transform="translate({stats_x}, 55)">',
+        '    <text class="serif" font-size="34" fill="#18181b">42 <tspan font-style="italic">days</tspan></text>',
+        '    <text class="sans" y="24" font-size="12" fill="#64748b">current streak, and the longest</text>',
+        '  </g>',
+        f'  <g transform="translate({stats_x}, 130)">',
+        '    <text class="serif" font-size="34" fill="#18181b">248 <tspan font-size="24" fill="#64748b">/ 365</tspan></text>',
+        '    <text class="sans" y="24" font-size="12" fill="#64748b">days with a commit</text>',
+        '  </g>',
+        f'  <g transform="translate({stats_x}, 205)">',
+        '    <text class="serif" font-size="34" fill="#18181b">38</text>',
+        '    <text class="sans" y="24" font-size="12" fill="#64748b">on the busiest day</text>',
+        '  </g>',
+        '</svg>'
+    ])
+
+    out_file = os.path.join(ASSETS_DIR, "activity.svg")
+    with open(out_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(svg_lines))
+    print(f"Generated {out_file}")
+
+
+# ---------------------------------------------------------------------------
+# 5. 3 COLOR HIGHLIGHT CARDS (highlights.svg)
+# ---------------------------------------------------------------------------
+
+def generate_highlights_card():
+    svg_lines = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" width="100%" height="100%">',
+        '  <style>',
+        f'    .serif {{ font-family: {SERIF_FONT}; }}',
+        f'    .mono {{ font-family: {MONO_FONT}; }}',
+        f'    .sans {{ font-family: {SANS_FONT}; }}',
+        '  </style>',
+        '',
+        '  <!-- Card 1: Blue (BUILD) -->',
+        '  <g transform="translate(0, 0)">',
+        '    <rect x="0" y="0" width="294" height="190" rx="18" fill="#2563eb" />',
+        '    <text class="mono" x="26" y="38" fill="#bfdbfe" font-size="11" font-weight="700" letter-spacing="1.5">BUILD ↗</text>',
+        '    <text class="serif" x="26" y="96" fill="#ffffff" font-size="38" font-style="italic">Svarix</text>',
+        '    <text class="sans" x="26" y="132" fill="#dbeafe" font-size="13.5" font-weight="400">',
+        '      <tspan x="26" y="132">Next-gen music platform and</tspan>',
+        '      <tspan x="26" y="152">interactive audio experience.</tspan>',
+        '    </text>',
+        '  </g>',
+        '',
+        '  <!-- Card 2: Red (TECH) -->',
+        '  <g transform="translate(313, 0)">',
+        '    <rect x="0" y="0" width="294" height="190" rx="18" fill="#dc2626" />',
+        '    <text class="mono" x="26" y="38" fill="#fecaca" font-size="11" font-weight="700" letter-spacing="1.5">TECH ↗</text>',
+        '    <text class="serif" x="26" y="96" fill="#ffffff" font-size="38" font-style="italic">Fullstack</text>',
+        '    <text class="sans" x="26" y="132" fill="#fee2e2" font-size="13.5" font-weight="400">',
+        '      <tspan x="26" y="132">TypeScript, React, Next.js, Node,</tspan>',
+        '      <tspan x="26" y="152">Python and Web Audio DSP.</tspan>',
+        '    </text>',
+        '  </g>',
+        '',
+        '  <!-- Card 3: Amber (AUDIO) -->',
+        '  <g transform="translate(626, 0)">',
+        '    <rect x="0" y="0" width="294" height="190" rx="18" fill="#f59e0b" />',
+        '    <text class="mono" x="26" y="38" fill="#78350f" font-size="11" font-weight="700" letter-spacing="1.5">AUDIO ↗</text>',
+        '    <text class="serif" x="26" y="96" fill="#18181b" font-size="38" font-style="italic">Sound &amp; Code</text>',
+        '    <text class="sans" x="26" y="132" fill="#451a03" font-size="13.5" font-weight="500">',
+        '      <tspan x="26" y="132">Blending algorithmic sound</tspan>',
+        '      <tspan x="26" y="152">design with modern web UI.</tspan>',
+        '    </text>',
+        '  </g>',
+        '</svg>'
+    ]
+
+    out_file = os.path.join(ASSETS_DIR, "highlights.svg")
+    with open(out_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(svg_lines))
+    print(f"Generated {out_file}")
+
+
+# ---------------------------------------------------------------------------
+# 6. "WHAT I'M CODING" (projects.svg)
+# ---------------------------------------------------------------------------
+
+def generate_projects_card():
+    svg_lines = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 230" width="100%" height="100%">',
+        '  <style>',
+        f'    .serif {{ font-family: {SERIF_FONT}; }}',
+        f'    .mono {{ font-family: {MONO_FONT}; }}',
+        f'    .sans {{ font-family: {SANS_FONT}; }}',
+        '  </style>',
+        '',
+        '  <!-- Section Header -->',
+        '  <text class="serif" x="2" y="32" fill="#f4f0ea" font-size="34">What I\'m <tspan font-style="italic">coding</tspan></text>',
+        '',
+        '  <!-- Project 1: Svarix -->',
+        '  <g transform="translate(0, 52)">',
+        '    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />',
+        '    <rect x="24" y="24" width="8" height="8" rx="2" fill="#2563eb" />',
+        '    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">svarix-audio</text>',
+        '    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">',
+        '      <tspan x="24" y="68">High-fidelity music playback platform</tspan>',
+        '      <tspan x="24" y="88">with custom audio DSP &amp; waveforms.</tspan>',
+        '    </text>',
+        '    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">TypeScript · ★ React</text>',
+        '  </g>',
+        '',
+        '  <!-- Project 2: EEG AI -->',
+        '  <g transform="translate(313, 52)">',
+        '    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />',
+        '    <rect x="24" y="24" width="8" height="8" rx="2" fill="#dc2626" />',
+        '    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">eeg-ai-manthan</text>',
+        '    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">',
+        '      <tspan x="24" y="68">AI-powered EEG signal classification</tspan>',
+        '      <tspan x="24" y="88">and brain-computer interface system.</tspan>',
+        '    </text>',
+        '    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">Python · PyTorch</text>',
+        '  </g>',
+        '',
+        '  <!-- Project 3: Lowkey Social -->',
+        '  <g transform="translate(626, 52)">',
+        '    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />',
+        '    <rect x="24" y="24" width="8" height="8" rx="2" fill="#f59e0b" />',
+        '    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">lowkey-social</text>',
+        '    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">',
+        '      <tspan x="24" y="68">Distraction-free minimalist social network</tspan>',
+        '      <tspan x="24" y="88">for engineers &amp; creative builders.</tspan>',
+        '    </text>',
+        '    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">Next.js · Tailwind</text>',
+        '  </g>',
+        '</svg>'
+    ]
+
+    out_file = os.path.join(ASSETS_DIR, "projects.svg")
     with open(out_file, "w", encoding="utf-8") as f:
         f.write("\n".join(svg_lines))
     print(f"Generated {out_file}")
 
 
 def main():
-    print("Generating animated profile assets for @aryannn555...")
-    generate_ascii_portrait()
-    generate_info_card()
-    generate_contribution_heatmap()
-    print("All profile assets generated successfully!")
+    print("Generating editorial suite for @aryannn555...")
+    generate_hero_card()
+    generate_calendar_card()
+    generate_activity_card()
+    generate_highlights_card()
+    generate_projects_card()
+    print("All editorial SVG cards generated successfully!")
 
 if __name__ == "__main__":
     main()

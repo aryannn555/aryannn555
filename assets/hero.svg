@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 370" width="100%" height="100%">
+  <defs>
+    <filter id="softGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.04"/>
+    </filter>
+  </defs>
+  <style>
+    @keyframes asciiRowFade {
+      0% { opacity: 0; transform: translateY(2px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroFadeIn {
+      0% { opacity: 0; transform: translateY(-4px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .serif { font-family: 'Instrument Serif', 'Newsreader', 'Playfair Display', Georgia, 'Times New Roman', serif; }
+    .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .ascii-row { opacity: 0; animation: asciiRowFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .hero-text { opacity: 0; animation: heroFadeIn 0.5s ease-out forwards; }
+  </style>
+
+  <!-- Warm Paper Background -->
+  <rect x="1" y="1" width="918" height="368" rx="20" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" filter="url(#softGlow)" />
+
+  <!-- Top Role Badge -->
+  <g class="hero-text" style="animation-delay: 0.1s;" transform="translate(42, 45)">
+    <rect x="0" y="-8" width="8" height="8" rx="1.5" fill="#2563eb" />
+    <text class="mono" x="18" y="0" fill="#64748b" font-size="11.5" font-weight="600" letter-spacing="1.5">FULLSTACK &amp; AUDIO ENGINEER · CREATOR OF SVARIX</text>
+  </g>
+
+  <!-- Large Editorial Headings -->
+  <g class="hero-text" style="animation-delay: 0.18s;" transform="translate(42, 142)">
+    <text class="serif" font-size="82" font-weight="400" fill="#18181b">Aryan</text>
+    <text class="serif" y="82" font-size="82" font-weight="400" fill="#18181b">Gup<tspan fill="#2563eb" font-style="italic">ta</tspan></text>
+  </g>
+
+  <!-- Editorial Bio Paragraph -->
+  <g class="hero-text" style="animation-delay: 0.28s;" transform="translate(42, 276)">
+    <text class="sans" font-size="15" font-weight="400" fill="#3f3f46">
+      <tspan x="0" y="0">I build high-performance audio web platforms, craft rich UI experiences,</tspan>
+      <tspan x="0" y="24">and compose code &amp; beats across the modern stack.</tspan>
+    </text>
+    <text class="mono" x="0" y="56" font-size="12.5" font-weight="600" fill="#2563eb">github.com/aryannn555 ↗</text>
+  </g>
+
+  <!-- Fine Stipple ASCII Portrait -->
+  <text class="mono ascii-row" x="510" y="65.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.12s;"> :++=..--::::::.....:::                       </text>
+  <text class="mono ascii-row" x="510" y="76.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.148s;">.--==:............     .                      </text>
+  <text class="mono ascii-row" x="510" y="87.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.176s;"> .:-:. .::..  .                               </text>
+  <text class="mono ascii-row" x="510" y="98.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.204s;"> ...    ::..:.                                </text>
+  <text class="mono ascii-row" x="510" y="109.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.232s;">.   ..     :.                                 </text>
+  <text class="mono ascii-row" x="510" y="121.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.26s;">..  .. .   :.       :-=+=:.                   </text>
+  <text class="mono ascii-row" x="510" y="132.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.288s;">    ....  .::     .-====--+:                  </text>
+  <text class="mono ascii-row" x="510" y="143.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.316s;">     .::..:-.   :...:--..-==  .               </text>
+  <text class="mono ascii-row" x="510" y="154.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.344s;"> .:--:=-=+=-.. .:.::.:---=++=+=     :+=::.  . </text>
+  <text class="mono ascii-row" x="510" y="165.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.372s;">+%@%%--#%*=:..::=--:.-+===+**+- .  .+*=+*-.=*=</text>
+  <text class="mono ascii-row" x="510" y="177.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.4s;">=:.:-:=%#=.:+-::=:-::-=====*==::===*#*:+#=.-==</text>
+  <text class="mono ascii-row" x="510" y="188.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.428s;">:     .-:..:=:.:--:.:=++=+++::-=-=***++*+-....</text>
+  <text class="mono ascii-row" x="510" y="199.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.456s;">.   :::. .::::   .:::-=+***+--===:.---=-:.....</text>
+  <text class="mono ascii-row" x="510" y="210.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.484s;">.-=--++-....::    ::::-=++++:..+=...:..  ::.::</text>
+  <text class="mono ascii-row" x="510" y="221.79999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.512s;"> :==+#*=:  .. .:. :...-+**+*- :--:. ..   :. ..</text>
+  <text class="mono ascii-row" x="510" y="233.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.54s;">.-==+#*=:  :-:*#- =::.:++*++=: :-=-  :  ..    </text>
+  <text class="mono ascii-row" x="510" y="244.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.568s;">:--=**=.   .:..   -=---=++=:+:   ..  .  ..    </text>
+  <text class="mono ascii-row" x="510" y="255.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.596s;">...-*+:            +=---=-.=#                 </text>
+  <text class="mono ascii-row" x="510" y="266.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.624s;">   :-.             :-==-::==-                 </text>
+  <text class="mono ascii-row" x="510" y="277.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.652s;">--                 .===-.:#=                  </text>
+  <text class="mono ascii-row" x="510" y="289.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.68s;">*=                  =***--+-                  </text>
+  <text class="mono ascii-row" x="510" y="300.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.708s;">=.                  .***+**.                  </text>
+  <text class="mono ascii-row" x="510" y="311.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.736s;">=                    =*+##+                   </text>
+  <text class="mono ascii-row" x="510" y="322.59999999999997" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.764s;">=                     ++#*-                   </text>
+  <text class="mono ascii-row" x="510" y="333.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.792s;">                      .*#+.                   </text>
+  <text class="mono ascii-row" x="510" y="345.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.82s;">                       +#=                    </text>
+</svg>
