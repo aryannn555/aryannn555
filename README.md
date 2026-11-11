@@ -1,14 +1,14 @@
 <div align="center">
 
 <!-- Hero Card -->
-<img src="./cards/hero.svg" width="100%" alt="Aryan Gupta - Fullstack & Audio Engineer" />
+<a href="https://aryangupta-nu.vercel.app"><img src="./cards/hero.svg" width="100%" alt="Aryan Gupta - Fullstack & Audio Engineer" /></a>
 
 <br/><br/>
 
 <!-- Three Linked Tiles in a Row (Each at width 32.5%) -->
 <a href="https://github.com/aryannn555/Svarix-New"><img src="./cards/tile-1.svg" width="32.5%" alt="Build Svarix" /></a>
 <a href="https://github.com/aryannn555/Halo-BCI"><img src="./cards/tile-2.svg" width="32.5%" alt="Halo-BCI & Hackathons" /></a>
-<a href="https://aryangupta.dev"><img src="./cards/tile-3.svg" width="32.5%" alt="Fullstack Tech Stack" /></a>
+<a href="https://aryangupta-nu.vercel.app"><img src="./cards/tile-3.svg" width="32.5%" alt="Fullstack Tech Stack" /></a>
 
 <br/><br/>
 
@@ -33,7 +33,7 @@
 
 <!-- Footer Links -->
 <p align="center">
-  <a href="https://aryangupta.dev"><b>aryangupta.dev</b></a> &nbsp;•&nbsp; 
+  <a href="https://aryangupta-nu.vercel.app"><b>aryangupta-nu.vercel.app</b></a> &nbsp;•&nbsp; 
   <a href="https://github.com/aryannn555/Svarix-New"><b>svarix music</b></a> &nbsp;•&nbsp; 
   <a href="https://www.linkedin.com/in/aryan-gupta-340a54359/"><b>linkedin</b></a> &nbsp;•&nbsp; 
   <a href="https://instagram.com/_aryannn555"><b>instagram</b></a> &nbsp;•&nbsp; 
