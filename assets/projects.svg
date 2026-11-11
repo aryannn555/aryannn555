@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 230" width="100%" height="100%">
+  <style>
+    .serif { font-family: 'Instrument Serif', 'Newsreader', 'Playfair Display', Georgia, 'Times New Roman', serif; }
+    .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+
+  <!-- Section Header -->
+  <text class="serif" x="2" y="32" fill="#f4f0ea" font-size="34">What I'm <tspan font-style="italic">coding</tspan></text>
+
+  <!-- Project 1: Svarix -->
+  <g transform="translate(0, 52)">
+    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />
+    <rect x="24" y="24" width="8" height="8" rx="2" fill="#2563eb" />
+    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">svarix-audio</text>
+    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">
+      <tspan x="24" y="68">High-fidelity music playback platform</tspan>
+      <tspan x="24" y="88">with custom audio DSP &amp; waveforms.</tspan>
+    </text>
+    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">TypeScript · ★ React</text>
+  </g>
+
+  <!-- Project 2: EEG AI -->
+  <g transform="translate(313, 52)">
+    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />
+    <rect x="24" y="24" width="8" height="8" rx="2" fill="#dc2626" />
+    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">eeg-ai-manthan</text>
+    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">
+      <tspan x="24" y="68">AI-powered EEG signal classification</tspan>
+      <tspan x="24" y="88">and brain-computer interface system.</tspan>
+    </text>
+    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">Python · PyTorch</text>
+  </g>
+
+  <!-- Project 3: Lowkey Social -->
+  <g transform="translate(626, 52)">
+    <rect x="0" y="0" width="294" height="175" rx="18" fill="#f4f0ea" stroke="#e6e1d8" stroke-width="1.5" />
+    <rect x="24" y="24" width="8" height="8" rx="2" fill="#f59e0b" />
+    <text class="mono" x="38" y="32" fill="#18181b" font-size="14.5" font-weight="700">lowkey-social</text>
+    <text class="sans" x="24" y="68" fill="#4b5563" font-size="13" font-weight="400">
+      <tspan x="24" y="68">Distraction-free minimalist social network</tspan>
+      <tspan x="24" y="88">for engineers &amp; creative builders.</tspan>
+    </text>
+    <text class="mono" x="24" y="145" fill="#64748b" font-size="11.5">Next.js · Tailwind</text>
+  </g>
+</svg>
