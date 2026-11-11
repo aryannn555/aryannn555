@@ -391,7 +391,7 @@ def generate_avatar_ascii(width=60, height=38):
 # ---------------------------------------------------------------------------
 
 def render_hero_card():
-    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta.dev ↗"
+    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta-nu.vercel.app ↗"
     font_css = build_font_css(text_corpus)
     ascii_rows = generate_avatar_ascii(width=60, height=38)
 
@@ -431,7 +431,7 @@ def render_hero_card():
         f'  <g class="hero-bio">',
         f'    <text class="brico" x="42" y="260" font-size="15" font-weight="500" fill="{COLOR_INK_MUTED}">Building things that don\'t break at 3 AM.</text>',
         f'    <text class="brico" x="42" y="284" font-size="15" font-weight="500" fill="{COLOR_INK_MUTED}">Solo developer &amp; CS student who builds with AI and ships anyway.</text>',
-        f'    <text class="geist" x="42" y="318" font-size="13" font-weight="600" fill="{COLOR_SKY}">aryangupta.dev ↗</text>',
+        f'    <text class="geist" x="42" y="318" font-size="13" font-weight="600" fill="{COLOR_SKY}">aryangupta-nu.vercel.app ↗</text>',
         f'  </g>',
         '',
         '  <!-- High-Density Silhouette ASCII Portrait -->'
