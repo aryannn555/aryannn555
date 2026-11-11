@@ -45,30 +45,30 @@
   </g>
 
   <!-- Fine Stipple ASCII Portrait -->
-  <text class="mono ascii-row" x="510" y="65.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.12s;"> :++=..--::::::.....:::                       </text>
-  <text class="mono ascii-row" x="510" y="76.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.148s;">.--==:............     .                      </text>
-  <text class="mono ascii-row" x="510" y="87.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.176s;"> .:-:. .::..  .                               </text>
-  <text class="mono ascii-row" x="510" y="98.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.204s;"> ...    ::..:.                                </text>
-  <text class="mono ascii-row" x="510" y="109.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.232s;">.   ..     :.                                 </text>
-  <text class="mono ascii-row" x="510" y="121.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.26s;">..  .. .   :.       :-=+=:.                   </text>
-  <text class="mono ascii-row" x="510" y="132.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.288s;">    ....  .::     .-====--+:                  </text>
-  <text class="mono ascii-row" x="510" y="143.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.316s;">     .::..:-.   :...:--..-==  .               </text>
-  <text class="mono ascii-row" x="510" y="154.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.344s;"> .:--:=-=+=-.. .:.::.:---=++=+=     :+=::.  . </text>
-  <text class="mono ascii-row" x="510" y="165.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.372s;">+%@%%--#%*=:..::=--:.-+===+**+- .  .+*=+*-.=*=</text>
-  <text class="mono ascii-row" x="510" y="177.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.4s;">=:.:-:=%#=.:+-::=:-::-=====*==::===*#*:+#=.-==</text>
-  <text class="mono ascii-row" x="510" y="188.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.428s;">:     .-:..:=:.:--:.:=++=+++::-=-=***++*+-....</text>
-  <text class="mono ascii-row" x="510" y="199.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.456s;">.   :::. .::::   .:::-=+***+--===:.---=-:.....</text>
-  <text class="mono ascii-row" x="510" y="210.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.484s;">.-=--++-....::    ::::-=++++:..+=...:..  ::.::</text>
-  <text class="mono ascii-row" x="510" y="221.79999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.512s;"> :==+#*=:  .. .:. :...-+**+*- :--:. ..   :. ..</text>
-  <text class="mono ascii-row" x="510" y="233.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.54s;">.-==+#*=:  :-:*#- =::.:++*++=: :-=-  :  ..    </text>
-  <text class="mono ascii-row" x="510" y="244.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.568s;">:--=**=.   .:..   -=---=++=:+:   ..  .  ..    </text>
-  <text class="mono ascii-row" x="510" y="255.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.596s;">...-*+:            +=---=-.=#                 </text>
-  <text class="mono ascii-row" x="510" y="266.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.624s;">   :-.             :-==-::==-                 </text>
-  <text class="mono ascii-row" x="510" y="277.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.652s;">--                 .===-.:#=                  </text>
-  <text class="mono ascii-row" x="510" y="289.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.68s;">*=                  =***--+-                  </text>
-  <text class="mono ascii-row" x="510" y="300.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.708s;">=.                  .***+**.                  </text>
-  <text class="mono ascii-row" x="510" y="311.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.736s;">=                    =*+##+                   </text>
-  <text class="mono ascii-row" x="510" y="322.59999999999997" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.764s;">=                     ++#*-                   </text>
-  <text class="mono ascii-row" x="510" y="333.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.792s;">                      .*#+.                   </text>
-  <text class="mono ascii-row" x="510" y="345.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.82s;">                       +#=                    </text>
+  <text class="mono ascii-row" x="510" y="65.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.12s;"> =++=::::::::::....::::                       </text>
+  <text class="mono ascii-row" x="510" y="76.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.148s;">.:-==:....... .:.      .                      </text>
+  <text class="mono ascii-row" x="510" y="87.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.176s;">..--:  .-::....                               </text>
+  <text class="mono ascii-row" x="510" y="98.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.204s;">....    ::.::                                 </text>
+  <text class="mono ascii-row" x="510" y="109.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.232s;">.. .:.     -.         ..                      </text>
+  <text class="mono ascii-row" x="510" y="121.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.26s;">.. .:. .  .-.      .-=+*+=:                   </text>
+  <text class="mono ascii-row" x="510" y="132.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.288s;">   ....:  :-:    .:-=+=---+:                  </text>
+  <text class="mono ascii-row" x="510" y="143.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.316s;">   . .=-.:--.  .-...:-:.:-+=.::               </text>
+  <text class="mono ascii-row" x="510" y="154.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.344s;">.-=+=-=-+*+=.:..-::-.-=-=+++++-     +*=--  .. </text>
+  <text class="mono ascii-row" x="510" y="165.8" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.372s;">*%%%%-=%%*-:.:.-=-=:.=++=+***+:.:. -*+-**:.+*-</text>
+  <text class="mono ascii-row" x="510" y="177.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.4s;">-. :::+#*-.-#-::=--::-=+==+*-=:-=+*##+-*#-:-=-</text>
+  <text class="mono ascii-row" x="510" y="188.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.428s;">:     ::..::=:.:--::-=++++*+:-==-=***++*+:....</text>
+  <text class="mono ascii-row" x="510" y="199.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.456s;">.   :--..:::::   .::-=+****+-==+=.:---=-.::.:.</text>
+  <text class="mono ascii-row" x="510" y="210.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.484s;">.=+==++-::::::   .::::==++*+. :+=..:-.. .-:.::</text>
+  <text class="mono ascii-row" x="510" y="221.79999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.512s;"> -=+*##=:  ...:-:.:..:=+****-.-=--. ..  .:....</text>
+  <text class="mono ascii-row" x="510" y="233.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.54s;">.-==*#*=:  ---##:.=:::-+***++..:=+: .:  ..   .</text>
+  <text class="mono ascii-row" x="510" y="244.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.568s;">:-==**-    ....   +=---=++=:*    ..  .  :.    </text>
+  <text class="mono ascii-row" x="510" y="255.39999999999998" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.596s;">...=#+.           :+=-===-.+*                 </text>
+  <text class="mono ascii-row" x="510" y="266.6" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.624s;">   --.             --==-::+=:                 </text>
+  <text class="mono ascii-row" x="510" y="277.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.652s;">=-                 .=++-.-#-                  </text>
+  <text class="mono ascii-row" x="510" y="289.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.68s;">#=                  +***-=+:                 .</text>
+  <text class="mono ascii-row" x="510" y="300.2" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.708s;">+.                  :*#*+#+.                  </text>
+  <text class="mono ascii-row" x="510" y="311.4" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.736s;">=                    +*+##+                   </text>
+  <text class="mono ascii-row" x="510" y="322.59999999999997" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.764s;">=                    :**#*-                   </text>
+  <text class="mono ascii-row" x="510" y="333.79999999999995" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.792s;">                      =*#+                    </text>
+  <text class="mono ascii-row" x="510" y="345.0" fill="#27272a" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.82s;">                       **-                    </text>
 </svg>
