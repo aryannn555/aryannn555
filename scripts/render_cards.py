@@ -139,8 +139,15 @@ def build_font_css(subset_chars):
 
 def load_or_fetch_contributions():
     json_path = os.path.join(DATA_DIR, "contributions.json")
-    
-    token = os.environ.get("GITHUB_TOKEN")
+    local_data = None
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                local_data = json.load(f)
+        except Exception:
+            local_data = None
+
+    token = os.environ.get("GH_PAT") or os.environ.get("PAT_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if token:
         try:
             query = """
@@ -175,6 +182,12 @@ def load_or_fetch_contributions():
                 cal = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
                 weeks = cal["weeks"]
                 total = cal["totalContributions"]
+                
+                # Check if fetched total is lower than our baseline local total (which includes private contributions)
+                local_total = local_data.get("total_contributions", 0) if local_data else 0
+                if local_data and total < local_total:
+                    print(f"GraphQL returned {total} contributions (public only); keeping local baseline of {local_total} contributions (including private contributions).")
+                    return local_data
                 
                 active_days = 0
                 longest = 0
@@ -240,19 +253,18 @@ def load_or_fetch_contributions():
         except Exception as e:
             print(f"GraphQL fetch failed ({e}); falling back to local JSON cache.")
 
-    if os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+    if local_data:
+        return local_data
 
     return {
         "username": "aryannn555",
-        "total_contributions": 912,
-        "current_streak": 42,
-        "longest_streak": 42,
-        "active_days": 248,
+        "total_contributions": 190,
+        "current_streak": 5,
+        "longest_streak": 10,
+        "active_days": 56,
         "total_days": 365,
-        "busiest_day": {"date": "2026-03-14", "count": 38},
-        "months": [{"label": m, "count": 60, "is_peak": m == "Mar"} for m in ["Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"]],
+        "busiest_day": {"date": "2026-11-11", "count": 17},
+        "months": [{"label": m, "count": 15, "is_peak": m == "Sep"} for m in ["Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"]],
         "weeks": []
     }
 
@@ -265,64 +277,113 @@ def generate_avatar_ascii(width=60, height=38):
     """
     Renders high-definition silhouette stipple ASCII portrait.
     Masks out background bokeh so dark hair, glasses, and blazer render cleanly.
+    Supports Pillow (cross-platform / Ubuntu CI) and sips (macOS), with cached fallback.
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
-    if not os.path.exists(avatar_path):
-        avatar_path = "/tmp/avatar.png"
-    
-    tmp_bmp = "/tmp/avatar_hires_clean.bmp"
+    ascii_cache_path = os.path.join(ROOT_DIR, "assets", "avatar_ascii.txt")
+    CHARS = " .:-=+*#%@"
+
+    # 1. Try with Pillow (cross-platform, works on Linux/Ubuntu GitHub Actions runner)
     try:
-        subprocess.run(
-            ["sips", "-z", str(height), str(width), "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        with open(tmp_bmp, "rb") as f:
-            data = f.read()
+        from PIL import Image
+        if os.path.exists(avatar_path):
+            img = Image.open(avatar_path).convert("RGB")
+            img = img.resize((width, height), Image.Resampling.LANCZOS)
+            pixels = img.load()
+            rows = []
+            for y in range(height):
+                ny = (y / (height - 1)) if height > 1 else 0
+                line = []
+                for x in range(width):
+                    nx = (x / (width - 1)) * 2 - 1 if width > 1 else 0
+                    r, g, b = pixels[x, y]
+                    lum = 0.299 * r + 0.587 * g + 0.114 * b
 
-        offset = struct.unpack("<I", data[10:14])[0]
-        w = struct.unpack("<i", data[18:22])[0]
-        h = struct.unpack("<i", data[22:26])[0]
-        abs_h, abs_w = abs(h), abs(w)
-        stride = ((abs_w * 3 + 3) // 4) * 4
-        is_top_down = h < 0
+                    head_dx = (nx - 0.02) / 0.36
+                    head_dy = (ny - 0.32) / 0.30
+                    in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
 
-        # Ink density from lightest (space) to darkest ink (@)
-        CHARS = " .:-=+*#%@"
+                    shoulder_width = 0.40 + (ny - 0.55) * 1.3
+                    in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
 
-        rows = []
-        for y in range(abs_h):
-            actual_y = y if is_top_down else (abs_h - 1 - y)
-            row_off = offset + actual_y * stride
-            line = []
-            
-            ny = (y / (abs_h - 1))
-            
-            for x in range(abs_w):
-                nx = (x / (abs_w - 1)) * 2 - 1
-                
-                px = row_off + x * 3
-                b, g, r = data[px], data[px+1], data[px+2]
-                lum = 0.299 * r + 0.587 * g + 0.114 * b
-                
-                # Silhouette mask for Aryan
-                head_dx = (nx - 0.02) / 0.36
-                head_dy = (ny - 0.32) / 0.30
-                in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
-                
-                shoulder_width = 0.40 + (ny - 0.55) * 1.3
-                in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
-                
-                if not (in_head or in_shoulders):
-                    line.append(' ')
-                else:
-                    inv = 1.0 - (lum / 255.0)
-                    inv = math.pow(inv, 1.25)
-                    idx = int(inv * (len(CHARS) - 1))
-                    line.append(CHARS[idx])
-            rows.append("".join(line))
-        return rows
+                    if not (in_head or in_shoulders):
+                        line.append(' ')
+                    else:
+                        inv = 1.0 - (lum / 255.0)
+                        inv = math.pow(inv, 1.25)
+                        idx = int(inv * (len(CHARS) - 1))
+                        idx = max(0, min(len(CHARS) - 1, idx))
+                        line.append(CHARS[idx])
+                rows.append("".join(line))
+            with open(ascii_cache_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(rows))
+            return rows
     except Exception:
-        return ["  " * (width // 2) for _ in range(height)]
+        pass
+
+    # 2. Try with macOS sips + BMP parser
+    try:
+        if os.path.exists(avatar_path):
+            tmp_bmp = "/tmp/avatar_hires_clean.bmp"
+            subprocess.run(
+                ["sips", "-z", str(height), str(width), "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
+                check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            with open(tmp_bmp, "rb") as f:
+                data = f.read()
+
+            offset = struct.unpack("<I", data[10:14])[0]
+            w = struct.unpack("<i", data[18:22])[0]
+            h = struct.unpack("<i", data[22:26])[0]
+            abs_h, abs_w = abs(h), abs(w)
+            stride = ((abs_w * 3 + 3) // 4) * 4
+            is_top_down = h < 0
+
+            rows = []
+            for y in range(abs_h):
+                actual_y = y if is_top_down else (abs_h - 1 - y)
+                row_off = offset + actual_y * stride
+                line = []
+                ny = (y / (abs_h - 1)) if abs_h > 1 else 0
+                for x in range(abs_w):
+                    nx = (x / (abs_w - 1)) * 2 - 1 if abs_w > 1 else 0
+                    px = row_off + x * 3
+                    b, g, r = data[px], data[px+1], data[px+2]
+                    lum = 0.299 * r + 0.587 * g + 0.114 * b
+
+                    head_dx = (nx - 0.02) / 0.36
+                    head_dy = (ny - 0.32) / 0.30
+                    in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
+
+                    shoulder_width = 0.40 + (ny - 0.55) * 1.3
+                    in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
+
+                    if not (in_head or in_shoulders):
+                        line.append(' ')
+                    else:
+                        inv = 1.0 - (lum / 255.0)
+                        inv = math.pow(inv, 1.25)
+                        idx = int(inv * (len(CHARS) - 1))
+                        idx = max(0, min(len(CHARS) - 1, idx))
+                        line.append(CHARS[idx])
+                rows.append("".join(line))
+            with open(ascii_cache_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(rows))
+            return rows
+    except Exception:
+        pass
+
+    # 3. Fallback to cached ascii portrait file if present
+    if os.path.exists(ascii_cache_path):
+        try:
+            with open(ascii_cache_path, "r", encoding="utf-8") as f:
+                cached = [line.rstrip("\r\n") for line in f]
+                if len(cached) == height:
+                    return cached
+        except Exception:
+            pass
+
+    return [" " * width for _ in range(height)]
 
 
 # ---------------------------------------------------------------------------

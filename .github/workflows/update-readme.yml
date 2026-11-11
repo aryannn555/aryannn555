@@ -5,13 +5,6 @@ on:
     # Run automatically every day at 00:00 UTC
     - cron: '0 0 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
-  push:
-    branches:
-      - main
-    paths:
-      - 'scripts/**'
-      - 'fonts/**'
-      - 'assets/avatar.png'
 
 permissions:
   contents: write
