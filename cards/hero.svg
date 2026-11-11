@@ -74,30 +74,30 @@
   </g>
 
   <!-- ASCII Stipple Portrait -->
-  <text class="geist ascii-row" x="510" y="62.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.1s;"> -++=..---::--:....::-:                       </text>
-  <text class="geist ascii-row" x="510" y="73.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.124s;">.--==-.....:.......   ...                     </text>
-  <text class="geist ascii-row" x="510" y="84.4" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.148s;">..:-:...::... .                               </text>
-  <text class="geist ascii-row" x="510" y="95.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.172s;">....    ::.::.                                </text>
-  <text class="geist ascii-row" x="510" y="106.8" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.196s;">..  ..     ::                                 </text>
-  <text class="geist ascii-row" x="510" y="118.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.22s;">..  :. .   -.       :-=+=-.                   </text>
-  <text class="geist ascii-row" x="510" y="129.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.244s;">   .....  .::     :-==+===+:                  </text>
-  <text class="geist ascii-row" x="510" y="140.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.268s;">   . .--..--:   -...:--..-=+. .               </text>
-  <text class="geist ascii-row" x="510" y="151.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.292s;"> :---:=-=++=::..-:::.:=--=++=+=     -+=-:. .. </text>
-  <text class="geist ascii-row" x="510" y="162.8" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.316s;">+%@%%--#%*=:..::=-=-.-++++***+- .. .+*=+*-.=*=</text>
-  <text class="geist ascii-row" x="510" y="174.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.34s;">=:.:-:=%#=.-*=::=--::-=+==+*==--===*#*-*#=:-+=</text>
-  <text class="geist ascii-row" x="510" y="185.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.364s;">:     :-:..-=-.:--:::=++++++:-==-=*#**+**-:...</text>
-  <text class="geist ascii-row" x="510" y="196.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.388s;">.   :-:...::::.  .::-==+***+-====::-=-==:::.:.</text>
-  <text class="geist ascii-row" x="510" y="207.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.412s;">.-===++-::::::    :::-==++**:.:+=:.:-:.. :-.::</text>
-  <text class="geist ascii-row" x="510" y="218.79999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.436s;"> -=++##=-  ...::..::..-+****- :=--. ..  .:....</text>
-  <text class="geist ascii-row" x="510" y="230.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.46s;">.-==*#*=:  :--*#- =-::-+***++:.:=+- .:. ..    </text>
-  <text class="geist ascii-row" x="510" y="241.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.484s;">:-==*#=.   .:.:   -=---=++=:*:   ..  .  ..    </text>
-  <text class="geist ascii-row" x="510" y="252.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.508s;">.:.-**:           .+=-===-.=#                 </text>
-  <text class="geist ascii-row" x="510" y="263.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.532s;">   -=:             --===-:==-                 </text>
-  <text class="geist ascii-row" x="510" y="274.79999999999995" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.556s;">=-                 .==+-.:#=                  </text>
-  <text class="geist ascii-row" x="510" y="286.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.58s;">*=                  +***=-+-                 .</text>
-  <text class="geist ascii-row" x="510" y="297.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.604s;">+:                  .***+#*.                  </text>
-  <text class="geist ascii-row" x="510" y="308.4" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.628s;">+                    =*+##+                   </text>
-  <text class="geist ascii-row" x="510" y="319.59999999999997" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.652s;">=                     +*##=                   </text>
-  <text class="geist ascii-row" x="510" y="330.79999999999995" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.676s;">                      :*#*.                   </text>
-  <text class="geist ascii-row" x="510" y="342.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.7s;">                       +#=                    </text>
+  <text class="geist ascii-row" x="510" y="62.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.1s;"> =++=::::::::::....::::                       </text>
+  <text class="geist ascii-row" x="510" y="73.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.124s;">.:-==:....... .:.      .                      </text>
+  <text class="geist ascii-row" x="510" y="84.4" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.148s;">..--:  .-::....                               </text>
+  <text class="geist ascii-row" x="510" y="95.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.172s;">....    ::.::                                 </text>
+  <text class="geist ascii-row" x="510" y="106.8" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.196s;">.. .:.     -.         ..                      </text>
+  <text class="geist ascii-row" x="510" y="118.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.22s;">.. .:. .  .-.      .-=+*+=:                   </text>
+  <text class="geist ascii-row" x="510" y="129.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.244s;">   ....:  :-:    .:-=+=---+:                  </text>
+  <text class="geist ascii-row" x="510" y="140.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.268s;">   . .=-.:--.  .-...:-:.:-+=.::               </text>
+  <text class="geist ascii-row" x="510" y="151.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.292s;">.-=+=-=-+*+=.:..-::-.-=-=+++++-     +*=--  .. </text>
+  <text class="geist ascii-row" x="510" y="162.8" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.316s;">*%%%%-=%%*-:.:.-=-=:.=++=+***+:.:. -*+-**:.+*-</text>
+  <text class="geist ascii-row" x="510" y="174.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.34s;">-. :::+#*-.-#-::=--::-=+==+*-=:-=+*##+-*#-:-=-</text>
+  <text class="geist ascii-row" x="510" y="185.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.364s;">:     ::..::=:.:--::-=++++*+:-==-=***++*+:....</text>
+  <text class="geist ascii-row" x="510" y="196.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.388s;">.   :--..:::::   .::-=+****+-==+=.:---=-.::.:.</text>
+  <text class="geist ascii-row" x="510" y="207.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.412s;">.=+==++-::::::   .::::==++*+. :+=..:-.. .-:.::</text>
+  <text class="geist ascii-row" x="510" y="218.79999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.436s;"> -=+*##=:  ...:-:.:..:=+****-.-=--. ..  .:....</text>
+  <text class="geist ascii-row" x="510" y="230.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.46s;">.-==*#*=:  ---##:.=:::-+***++..:=+: .:  ..   .</text>
+  <text class="geist ascii-row" x="510" y="241.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.484s;">:-==**-    ....   +=---=++=:*    ..  .  :.    </text>
+  <text class="geist ascii-row" x="510" y="252.39999999999998" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.508s;">...=#+.           :+=-===-.+*                 </text>
+  <text class="geist ascii-row" x="510" y="263.6" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.532s;">   --.             --==-::+=:                 </text>
+  <text class="geist ascii-row" x="510" y="274.79999999999995" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.556s;">=-                 .=++-.-#-                  </text>
+  <text class="geist ascii-row" x="510" y="286.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.58s;">#=                  +***-=+:                 .</text>
+  <text class="geist ascii-row" x="510" y="297.2" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.604s;">+.                  :*#*+#+.                  </text>
+  <text class="geist ascii-row" x="510" y="308.4" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.628s;">=                    +*+##+                   </text>
+  <text class="geist ascii-row" x="510" y="319.59999999999997" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.652s;">=                    :**#*-                   </text>
+  <text class="geist ascii-row" x="510" y="330.79999999999995" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.676s;">                      =*#+                    </text>
+  <text class="geist ascii-row" x="510" y="342.0" fill="#13233A" font-size="10.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.7s;">                       **-                    </text>
 </svg>
