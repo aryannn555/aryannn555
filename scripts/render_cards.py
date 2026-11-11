@@ -580,28 +580,28 @@ def render_repo_cards():
         {
             "filename": "repo-svarix.svg",
             "dot_color": COLOR_SKY,
-            "name": "svarix-audio",
-            "line1": "High-fidelity music playback platform with",
-            "line2": "custom audio DSP, waveforms & reactive UI.",
-            "meta": "TypeScript · React · Web Audio API · ★ 18",
+            "name": "Svarix-New",
+            "line1": "Modern music platform with custom DSP,",
+            "line2": "reactive waveforms and clean playback UI.",
+            "meta": "TypeScript · React · Web Audio API",
             "delay": "1.35s"
         },
         {
-            "filename": "repo-trustescrow.svg",
+            "filename": "repo-halo.svg",
             "dot_color": COLOR_CORAL,
-            "name": "trust-escrow",
-            "line1": "Freelance trust protocol with 5-factor AI",
-            "line2": "dispute evaluation & state machine transitions.",
-            "meta": "TypeScript · Node.js · Groq LLM · ★ 12",
+            "name": "Halo-BCI",
+            "line1": "Brain-Computer Interface application for",
+            "line2": "neural signal processing and interactive UI.",
+            "meta": "TypeScript · Neurotech · Web API",
             "delay": "1.45s"
         },
         {
-            "filename": "repo-safer.svg",
+            "filename": "repo-prayatna.svg",
             "dot_color": COLOR_GRASS,
-            "name": "safer-mesh",
-            "line1": "Offline BLE mesh hardware safety ecosystem",
-            "line2": "with SOS message routing & live tracking.",
-            "meta": "Python · BLE Mesh · C++ · ★ 24",
+            "name": "PrayatnaCompanion",
+            "line1": "Hackathon companion app for offline BLE mesh",
+            "line2": "hardware routing and live safety telemetry.",
+            "meta": "TypeScript · BLE · Mobile Web",
             "delay": "1.55s"
         }
     ]
