@@ -42,20 +42,20 @@
       0% { transform: scaleY(0); }
       100% { transform: scaleY(1); }
     }
-    @keyframes cardFadeIn {
-      0% { opacity: 0; transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
-    .fade-elem { opacity: 0; animation: cardFadeIn 0.4s ease-out forwards; }
+    .fade-elem { opacity: 0; animation: fadeIn 0.4s ease-out forwards; }
     .chart-bar { transform-origin: bottom; animation: barRise 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
   </style>
   <rect x="1" y="1" width="918" height="278" rx="20" fill="#FFF8EC" stroke="rgba(19, 35, 58, 0.12)" stroke-width="1.5" />
 
   <!-- Header -->
-  <g class="fade-elem" style="animation-delay: 0.95s;" transform="translate(42, 42)">
-    <text class="geist" fill="#4B5D72" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>
-    <text class="serif" y="44" font-size="44" fill="#13233A">51 <tspan font-style="italic">contributions</tspan></text>
+  <g class="fade-elem" style="animation-delay: 0.95s;">
+    <text class="geist" x="42" y="46" fill="#4B5D72" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>
+    <text class="serif" x="42" y="90" font-size="44" fill="#13233A">51 <tspan font-style="italic">contributions</tspan></text>
   </g>
 
   <!-- Bar Chart -->
@@ -87,16 +87,16 @@
 
   <line x1="600" y1="40" x2="600" y2="240" stroke="rgba(19, 35, 58, 0.12)" stroke-width="1.5" />
 
-  <g class="fade-elem" style="animation-delay: 1.20s;" transform="translate(640, 55)">
-    <text class="serif" font-size="34" fill="#13233A">1 <tspan font-style="italic">days</tspan></text>
-    <text class="brico" y="24" font-size="12.5" fill="#4B5D72">current streak, and the longest</text>
+  <g class="fade-elem" style="animation-delay: 1.20s;">
+    <text class="serif" x="640" y="78" font-size="34" fill="#13233A">1 <tspan font-style="italic">days</tspan></text>
+    <text class="brico" x="640" y="102" font-size="12.5" fill="#4B5D72">current streak, and the longest</text>
   </g>
-  <g class="fade-elem" style="animation-delay: 1.25s;" transform="translate(640, 130)">
-    <text class="serif" font-size="34" fill="#13233A">9 <tspan font-size="24" fill="#4B5D72">/ 368</tspan></text>
-    <text class="brico" y="24" font-size="12.5" fill="#4B5D72">days with a commit</text>
+  <g class="fade-elem" style="animation-delay: 1.25s;">
+    <text class="serif" x="640" y="154" font-size="34" fill="#13233A">9 <tspan font-size="24" fill="#4B5D72">/ 368</tspan></text>
+    <text class="brico" x="640" y="178" font-size="12.5" fill="#4B5D72">days with a commit</text>
   </g>
-  <g class="fade-elem" style="animation-delay: 1.30s;" transform="translate(640, 205)">
-    <text class="serif" font-size="34" fill="#13233A">29</text>
-    <text class="brico" y="24" font-size="12.5" fill="#4B5D72">on the busiest day</text>
+  <g class="fade-elem" style="animation-delay: 1.30s;">
+    <text class="serif" x="640" y="228" font-size="34" fill="#13233A">29</text>
+    <text class="brico" x="640" y="252" font-size="12.5" fill="#4B5D72">on the busiest day</text>
   </g>
 </svg>
