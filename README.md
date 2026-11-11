@@ -1,32 +1,45 @@
 <div align="center">
 
-<img src="./assets/hero.svg" width="100%" alt="Aryan Gupta - Fullstack & Audio Engineer" />
+<!-- Hero Card -->
+<img src="./cards/hero.svg" width="100%" alt="Aryan Gupta - Fullstack & Audio Engineer" />
 
 <br/><br/>
 
-<img src="./assets/calendar.svg" width="100%" alt="Every day, in blue" />
+<!-- Three Linked Tiles in a Row (Each at width 32.5%) -->
+<a href="https://github.com/aryannn555/Svarix-New"><img src="./cards/tile-1.svg" width="32.5%" alt="Build Svarix" /></a>
+<a href="#featured-repos"><img src="./cards/tile-2.svg" width="32.5%" alt="Hackathons & Prototypes" /></a>
+<a href="https://aryangupta.dev"><img src="./cards/tile-3.svg" width="32.5%" alt="Fullstack Tech Stack" /></a>
 
 <br/><br/>
 
-<img src="./assets/activity.svg" width="100%" alt="The last 12 months on GitHub" />
+<!-- Monthly Contributions Bar Chart & Stats -->
+<img src="./cards/monthly-activity.svg" width="100%" alt="The last 12 months on GitHub" />
 
 <br/><br/>
 
-<img src="./assets/highlights.svg" width="100%" alt="Build, Tech and Sound Highlights" />
+<!-- One Card Per Featured Repo (Each at width 32.5%) -->
+<div id="featured-repos">
+  <a href="https://github.com/aryannn555/Svarix-New"><img src="./cards/repo-svarix.svg" width="32.5%" alt="Svarix Music Platform" /></a>
+  <a href="https://github.com/aryannn555"><img src="./cards/repo-trustescrow.svg" width="32.5%" alt="TrustEscrow Protocol" /></a>
+  <a href="https://github.com/aryannn555"><img src="./cards/repo-safer.svg" width="32.5%" alt="SAFER Mesh Ecosystem" /></a>
+</div>
 
 <br/><br/>
 
-<img src="./assets/projects.svg" width="100%" alt="What I'm coding" />
+<!-- Contribution Graph in Brand Colour -->
+<img src="./cards/contributions.svg" width="100%" alt="Every day, in blue" />
 
 <br/><br/>
 
+<!-- Footer Links -->
 <p align="center">
-  <a href="https://github.com/aryannn555"><b>github</b></a> &nbsp;•&nbsp; 
+  <a href="https://aryangupta.dev"><b>aryangupta.dev</b></a> &nbsp;•&nbsp; 
   <a href="https://github.com/aryannn555/Svarix-New"><b>svarix music</b></a> &nbsp;•&nbsp; 
-  <a href="https://linkedin.com"><b>linkedin</b></a> &nbsp;•&nbsp; 
+  <a href="https://www.linkedin.com/in/aryan-gupta-340a54359/"><b>linkedin</b></a> &nbsp;•&nbsp; 
+  <a href="https://instagram.com/_aryannn555"><b>instagram</b></a> &nbsp;•&nbsp; 
   <a href="https://github.com/aryannn555?tab=repositories"><b>repositories</b></a>
 </p>
 
-<sub>Refreshed automatically every day via GitHub Actions ⚡</sub>
+<sub>Refreshed daily via GitHub Actions ⚡</sub>
 
 </div>
