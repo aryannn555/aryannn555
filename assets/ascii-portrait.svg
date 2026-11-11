@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f141c" />
+      <stop offset="100%" stop-color="#0a0d13" />
+    </linearGradient>
+    <linearGradient id="asciiGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#58a6ff" />
+      <stop offset="50%" stop-color="#7ee787" />
+      <stop offset="100%" stop-color="#a5d6ff" />
+    </linearGradient>
+  </defs>
+  <style>
+    @keyframes rowFade {
+      0% { opacity: 0; transform: translateY(3px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cursorBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes promptTyping {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }
+    .row { opacity: 0; animation: rowFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .cursor { animation: cursorBlink 0.9s infinite; }
+  </style>
+
+  <!-- Card Background -->
+  <rect x="1" y="1" width="438" height="538" rx="12" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1.5" />
+
+  <!-- Window Titlebar -->
+  <path d="M 1 12 C 1 5.9 5.9 1 12 1 L 428 1 C 434.1 1 439 5.9 439 12 L 439 38 L 1 38 Z" fill="#161b22" />
+  <line x1="1" y1="38" x2="439" y2="38" stroke="#30363d" stroke-width="1" />
+  <circle cx="20" cy="19" r="6" fill="#ff5f56" />
+  <circle cx="38" cy="19" r="6" fill="#ffbd2e" />
+  <circle cx="56" cy="19" r="6" fill="#27c93f" />
+  <text class="mono" x="220" y="24" fill="#8b949e" font-size="12" font-weight="500" text-anchor="middle">aryannn555@macos: ~ (avatar.ascii)</text>
+
+  <!-- Terminal Prompt -->
+  <g transform="translate(22, 60)">
+    <text class="mono" font-size="12" font-weight="600">
+      <tspan fill="#7ee787">aryannn555@mbp</tspan>
+      <tspan fill="#8b949e">:</tspan>
+      <tspan fill="#58a6ff">~</tspan>
+      <tspan fill="#e6edf3">$ cat avatar.ascii</tspan>
+    </text>
+  </g>
+
+  <!-- ASCII Body -->
+  <text class="mono row" x="22" y="86.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.08s;">.-++-:&#x27;--&#x27;&#x27;&#x27;-&#x27;:::::&#x27;&#x27;&#x27;.                     </text>
+  <text class="mono row" x="22" y="101.2" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.112s;">:--==&#x27;:::::::::::.....:.                    </text>
+  <text class="mono row" x="22" y="116.4" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.144s;">.:&#x27;-&#x27;:.&#x27;&#x27;:::.:..          ....              </text>
+  <text class="mono row" x="22" y="131.6" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.176s;">.:::...:&#x27;::&#x27;:.              .         .     </text>
+  <text class="mono row" x="22" y="146.8" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.208s;">:...:.....:&#x27;.        ..      .     ......   </text>
+  <text class="mono row" x="22" y="162.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.24s;">::..:...  :&#x27;      .:-=+=&#x27;.   ...   ....     </text>
+  <text class="mono row" x="22" y="177.2" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.272s;">....:::: .&#x27;&#x27;.   .:-==+===+:  .    .  ..  .  </text>
+  <text class="mono row" x="22" y="192.39999999999998" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.304s;">  ...:-&#x27;::-&#x27;:  &#x27;:::&#x27;--::-+=.::       ... ...</text>
+  <text class="mono row" x="22" y="207.6" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.336s;">.&#x27;&#x27;---=-=+=-::.&#x27;&#x27;:&#x27;:&#x27;=--=++=+&#x27;    :++&#x27;&#x27;:..:.</text>
+  <text class="mono row" x="22" y="222.79999999999998" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.368s;">*@@@%&#x27;+%%*-::&#x27;:=---:-++=+***+:.:..-#+=*=:-*=</text>
+  <text class="mono row" x="22" y="238.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.4s;">=&#x27;:&#x27;-&#x27;*%*&#x27;:=+&#x27;:=--&#x27;&#x27;-=+==+*==&#x27;-==+##-=#+&#x27;-==</text>
+  <text class="mono row" x="22" y="253.2" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.432s;">&#x27;  ...&#x27;-:::--::&#x27;-&#x27;:&#x27;=++++*+&#x27;-=--+##*+**-::::</text>
+  <text class="mono row" x="22" y="268.4" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.464s;">:. .&#x27;&#x27;&#x27;:::&#x27;&#x27;&#x27;:. .&#x27;&#x27;&#x27;-=+***+-==+-:&#x27;=-==&#x27;:::::</text>
+  <text class="mono row" x="22" y="283.6" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.496s;">:-=-=++&#x27;:::&#x27;&#x27;:  .&#x27;&#x27;&#x27;&#x27;==++*+::-+-::&#x27;&#x27;:..&#x27;-:&#x27;&#x27;</text>
+  <text class="mono row" x="22" y="298.79999999999995" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.528s;">.-++*#*=&#x27;..:::&#x27;:.&#x27;:::-+****&#x27;.-=-&#x27;.::...:::::</text>
+  <text class="mono row" x="22" y="314.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.56s;">:-==*%*=: .-&#x27;+%+.=-&#x27;&#x27;&#x27;+***+=::-==:.&#x27;: .:....</text>
+  <text class="mono row" x="22" y="329.2" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.592s;">&#x27;-==**&#x27;.  .::::  &#x27;+---=++=&#x27;*.  .:..:: ::....</text>
+  <text class="mono row" x="22" y="344.4" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.624s;">:::=#+:          .++-===-:++          ..... </text>
+  <text class="mono row" x="22" y="359.59999999999997" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.656s;">  .--:            :-===&#x27;&#x27;+=&#x27;                </text>
+  <text class="mono row" x="22" y="374.8" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.688s;">=-                .==+-:-#-                .</text>
+  <text class="mono row" x="22" y="390.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.72s;">#=                 =*#*--+&#x27;                .</text>
+  <text class="mono row" x="22" y="405.2" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.752s;">+:                 .*#**#+.                 </text>
+  <text class="mono row" x="22" y="420.4" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.784s;">+                   -#+##=                  </text>
+  <text class="mono row" x="22" y="435.59999999999997" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.816s;">=                   .+*%#&#x27;                  </text>
+  <text class="mono row" x="22" y="450.79999999999995" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.848s;">.                    :##+.                  </text>
+  <text class="mono row" x="22" y="466.0" fill="url(#asciiGrad)" font-size="11.2" font-weight="600" xml:space="preserve" style="animation-delay: 0.88s;">                      +#-                   </text>
+
+  <!-- Status Footer -->
+  <line x1="1" y1="500" x2="439" y2="500" stroke="#21262d" stroke-width="1" />
+  <text class="mono" x="22" y="522" fill="#58a6ff" font-size="11" font-weight="600">NORMAL</text>
+  <text class="mono" x="80" y="522" fill="#8b949e" font-size="11">avatar.ascii [utf-8]</text>
+  <text class="mono" x="380" y="522" fill="#8b949e" font-size="11">100% 26:44</text>
+  <rect class="cursor" x="22" y="485.2" width="7.5" height="13" rx="1" fill="#7ee787" />
+</svg>
