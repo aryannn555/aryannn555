@@ -716,15 +716,15 @@ def render_contribution_graph(contrib_data):
 
     def get_color(count):
         if count == 0:
-            return "#F4EDE0"      # Paper tint empty cell
-        elif count <= 2:
-            return COLOR_SKY_LIGHT # #BAE6FD
-        elif count <= 5:
-            return "#60A5FA"
-        elif count <= 8:
-            return COLOR_SKY      # Brand #2F7FD8
+            return "#E8EEF5"       # Clean soft grey-blue tint empty dot (like Avi Vashishta)
+        elif count <= 3:
+            return COLOR_SKY_LIGHT # #BAE6FD (Level 1)
+        elif count <= 6:
+            return "#60A5FA"       # Medium blue (Level 2)
+        elif count <= 12:
+            return COLOR_SKY       # #2F7FD8 (Level 3)
         else:
-            return "#1D4ED8"
+            return "#1D4ED8"       # Deep blue (Level 4)
 
     anim_css = "" if IS_STATIC else """
     @keyframes cellPop {
@@ -736,12 +736,12 @@ def render_contribution_graph(contrib_data):
     """
 
     svg = [
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" width="100%" height="100%">',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 204" width="100%" height="100%">',
         '  <style>',
         font_css,
         anim_css,
         '  </style>',
-        f'  <rect x="1" y="1" width="918" height="188" rx="20" fill="{COLOR_PAPER}" stroke="{COLOR_LINE}" stroke-width="1.5" />',
+        f'  <rect x="1" y="1" width="918" height="202" rx="20" fill="{COLOR_PAPER}" stroke="{COLOR_LINE}" stroke-width="1.5" />',
         '',
         '  <!-- Title Bar -->',
         '  <g>',
@@ -768,7 +768,7 @@ def render_contribution_graph(contrib_data):
             first_day = week["contributionDays"][0]
             dt = datetime.strptime(first_day["date"], "%Y-%m-%d")
             m_name = months[dt.month - 1]
-            if m_name != last_m and col_idx < 50:
+            if m_name != last_m and col_idx < 44:
                 month_pos.append((x, m_name))
                 last_m = m_name
 
@@ -782,16 +782,16 @@ def render_contribution_graph(contrib_data):
 
     svg.append('')
     for mx, mname in month_pos:
-        svg.append(f'  <text class="geist" x="{mx}" y="180" fill="{COLOR_INK_MUTED}" font-size="10.5">{mname}</text>')
+        svg.append(f'  <text class="geist" x="{mx}" y="186" fill="{COLOR_INK_MUTED}" font-size="10.5">{mname}</text>')
 
     legend_x = 730
-    legend_y = 171
-    legend_colors = ["#F4EDE0", COLOR_SKY_LIGHT, "#60A5FA", COLOR_SKY, "#1D4ED8"]
-    svg.append(f'  <text class="geist" x="{legend_x - 30}" y="180" fill="{COLOR_INK_MUTED}" font-size="10.5">less</text>')
+    legend_y = 177
+    legend_colors = ["#E8EEF5", COLOR_SKY_LIGHT, "#60A5FA", COLOR_SKY, "#1D4ED8"]
+    svg.append(f'  <text class="geist" x="{legend_x - 30}" y="186" fill="{COLOR_INK_MUTED}" font-size="10.5">less</text>')
     for idx, c in enumerate(legend_colors):
         lx = legend_x + idx * 13
         svg.append(f'  <rect x="{lx}" y="{legend_y}" width="9" height="9" rx="2.5" fill="{c}" />')
-    svg.append(f'  <text class="geist" x="{legend_x + len(legend_colors)*13 + 6}" y="180" fill="{COLOR_INK_MUTED}" font-size="10.5">more</text>')
+    svg.append(f'  <text class="geist" x="{legend_x + len(legend_colors)*13 + 6}" y="186" fill="{COLOR_INK_MUTED}" font-size="10.5">more</text>')
 
     svg.append('</svg>')
 
