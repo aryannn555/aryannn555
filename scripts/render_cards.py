@@ -273,115 +273,174 @@ def load_or_fetch_contributions():
 # SILHOUETTE ASCII PORTRAIT GENERATOR (For Hero Card)
 # ---------------------------------------------------------------------------
 
-def generate_avatar_ascii(width=60, height=38):
+def generate_avatar_ascii(width=56, height=38):
     """
-    Renders high-definition silhouette stipple ASCII portrait.
-    Masks out background bokeh so dark hair, glasses, and blazer render cleanly.
-    Supports Pillow (cross-platform / Ubuntu CI) and sips (macOS), with cached fallback.
+    Renders high-definition editorial portrait ASCII art matching Avi Vashishta's style:
+    - Tight crop on head, curly hair, glasses frames, eyes, smile, jawline, and collar
+    - Multi-scale Sobel edge detection to sharply carve out rectangular glasses rims, nose, and lips
+    - Curly textured hair volume with open, clean luminous skin tone (zero background noise)
+    - Saves and caches result in assets/avatar_ascii.txt
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
     ascii_cache_path = os.path.join(ROOT_DIR, "assets", "avatar_ascii.txt")
-    CHARS = " .:-=+*#%@"
 
-    # 1. Try with Pillow (cross-platform, works on Linux/Ubuntu GitHub Actions runner)
+    cached_rows = None
+    if os.path.exists(ascii_cache_path):
+        try:
+            with open(ascii_cache_path, "r", encoding="utf-8") as f:
+                lines = [l.rstrip("\r\n") for l in f]
+                if len(lines) == height:
+                    cached_rows = lines
+        except Exception:
+            pass
+
+    def build_rows_from_accessor(img_w, img_h, get_rgb_fn):
+        def get_lum(x, y):
+            r, g, b = get_rgb_fn(x, y)
+            return 0.299 * r + 0.587 * g + 0.114 * b
+
+        crop_x0 = 100.0
+        crop_x1 = 335.0
+        crop_y0 = 30.0
+        crop_y1 = 345.0
+
+        rows = []
+        for out_y in range(height):
+            sy = crop_y0 + (out_y / (height - 1)) * (crop_y1 - crop_y0)
+            line = []
+            for out_x in range(width):
+                sx = crop_x0 + (out_x / (width - 1)) * (crop_x1 - crop_x0)
+
+                nx = (sx - 217.0) / 90.0
+                ny = (sy - 175.0) / 130.0
+
+                in_hair_box = (ny >= -1.12 and ny <= -0.15 and nx >= -0.85 and nx <= 0.95)
+                in_face_upper = (ny > -0.15 and ny <= 0.35 and nx >= -0.90 and nx <= 0.90)
+                jaw_w = 0.85 - (ny - 0.35) * 0.70
+                in_jaw = (ny > 0.35 and ny <= 0.90 and abs(nx + 0.04) <= jaw_w)
+                in_neck = (ny > 0.90 and ny <= 1.32 and nx >= -0.38 and nx <= 0.35)
+
+                in_silhouette = in_hair_box or in_face_upper or in_jaw or in_neck
+
+                if not in_silhouette:
+                    line.append(" ")
+                    continue
+
+                r, g, b = get_rgb_fn(sx, sy)
+                lum = 0.299 * r + 0.587 * g + 0.114 * b
+
+                gx = (get_lum(sx + 2, sy - 2) + 2 * get_lum(sx + 2, sy) + get_lum(sx + 2, sy + 2) -
+                     (get_lum(sx - 2, sy - 2) + 2 * get_lum(sx - 2, sy) + get_lum(sx - 2, sy + 2))) / 8.0
+                gy = (get_lum(sx - 2, sy + 2) + 2 * get_lum(sx, sy + 2) + get_lum(sx + 2, sy + 2) -
+                     (get_lum(sx - 2, sy - 2) + 2 * get_lum(sx, sy - 2) + get_lum(sx + 2, sy - 2))) / 8.0
+                edge = math.sqrt(gx * gx + gy * gy)
+
+                is_hair = (ny < -0.35 and lum < 80) or (ny < -0.10 and lum < 55) or (abs(nx) > 0.78 and ny < 0.25 and lum < 75)
+
+                if is_hair:
+                    if lum < 38:
+                        line.append("@" if (out_x + out_y) % 2 == 0 else "#")
+                    elif lum < 52:
+                        line.append("#" if edge > 16 else "%")
+                    elif lum < 70:
+                        line.append("*" if edge > 12 else "+")
+                    else:
+                        line.append(":")
+                elif in_neck:
+                    if abs(nx + 0.02) > 0.28 and edge > 16:
+                        line.append("|")
+                    elif sy > 310 and (r > 150 and b > 175):
+                        line.append("-" if abs(nx) < 0.2 else "/")
+                    elif edge > 22:
+                        line.append(":" if abs(gx) > abs(gy) else "-")
+                    else:
+                        line.append(" ")
+                else:
+                    if 200 <= sx <= 236 and 132 <= sy <= 148 and lum < 130:
+                        line.append("=" if abs(gy) > abs(gx) * 0.7 else "-")
+                    elif ((135 <= sx <= 198 and 126 <= sy <= 164) or (238 <= sx <= 302 and 126 <= sy <= 164)) and (lum < 95 or edge > 38):
+                        if lum < 55:
+                            line.append("#")
+                        elif edge > 42:
+                            line.append("|" if abs(gx) > abs(gy) * 1.3 else "=")
+                        else:
+                            line.append(":")
+                    elif 235 <= sy <= 270 and 180 <= sx <= 255:
+                        if lum < 125 or edge > 32:
+                            line.append("=" if abs(gy) > abs(gx) else "-")
+                        elif lum > 175 and abs(r - g) < 25:
+                            line.append(".")
+                        else:
+                            line.append(" ")
+                    elif 165 <= sy <= 230 and 208 <= sx <= 235:
+                        if edge > 24 and lum < 155:
+                            line.append("|" if abs(gx) > abs(gy) else ":")
+                        else:
+                            line.append(" ")
+                    elif 112 <= sy <= 126 and ((140 <= sx <= 195) or (240 <= sx <= 295)) and lum < 90:
+                        line.append("~" if abs(gy) > abs(gx) else "=")
+                    elif (abs(abs(nx + 0.04) - jaw_w) < 0.08 and edge > 15) or (edge > 36 and lum < 140):
+                        line.append("|" if abs(gx) > abs(gy) else "-")
+                    elif edge > 20 and lum < 130:
+                        line.append(":")
+                    else:
+                        line.append(" ")
+            rows.append("".join(line))
+        return rows
+
+    # 1. Try with Pillow
     try:
         from PIL import Image
         if os.path.exists(avatar_path):
-            img = Image.open(avatar_path).convert("RGB")
-            img = img.resize((width, height), Image.Resampling.LANCZOS)
-            pixels = img.load()
-            rows = []
-            for y in range(height):
-                ny = (y / (height - 1)) if height > 1 else 0
-                line = []
-                for x in range(width):
-                    nx = (x / (width - 1)) * 2 - 1 if width > 1 else 0
-                    r, g, b = pixels[x, y]
-                    lum = 0.299 * r + 0.587 * g + 0.114 * b
-
-                    head_dx = (nx - 0.02) / 0.36
-                    head_dy = (ny - 0.32) / 0.30
-                    in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
-
-                    shoulder_width = 0.40 + (ny - 0.55) * 1.3
-                    in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
-
-                    if not (in_head or in_shoulders):
-                        line.append(' ')
-                    else:
-                        inv = 1.0 - (lum / 255.0)
-                        inv = math.pow(inv, 1.25)
-                        idx = int(inv * (len(CHARS) - 1))
-                        idx = max(0, min(len(CHARS) - 1, idx))
-                        line.append(CHARS[idx])
-                rows.append("".join(line))
+            im = Image.open(avatar_path).convert("RGB")
+            w, h = im.size
+            px_data = im.load()
+            def pil_get_rgb(x, y):
+                ix = max(0, min(w - 1, int(x)))
+                iy = max(0, min(h - 1, int(y)))
+                return px_data[ix, iy]
+            rows = build_rows_from_accessor(w, h, pil_get_rgb)
             with open(ascii_cache_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(rows))
             return rows
     except Exception:
         pass
 
-    # 2. Try with macOS sips + BMP parser
+    # 2. Try with macOS sips
     try:
         if os.path.exists(avatar_path):
             tmp_bmp = "/tmp/avatar_hires_clean.bmp"
             subprocess.run(
-                ["sips", "-z", str(height), str(width), "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
+                ["sips", "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
                 check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
             with open(tmp_bmp, "rb") as f:
-                data = f.read()
-
-            offset = struct.unpack("<I", data[10:14])[0]
-            w = struct.unpack("<i", data[18:22])[0]
-            h = struct.unpack("<i", data[22:26])[0]
-            abs_h, abs_w = abs(h), abs(w)
-            stride = ((abs_w * 3 + 3) // 4) * 4
+                bmp_data = f.read()
+            offset = struct.unpack("<I", bmp_data[10:14])[0]
+            w = struct.unpack("<i", bmp_data[18:22])[0]
+            h = struct.unpack("<i", bmp_data[22:26])[0]
+            bpp = struct.unpack("<H", bmp_data[28:30])[0]
+            abs_w, abs_h = abs(w), abs(h)
             is_top_down = h < 0
+            stride = abs_w * 4 if bpp == 32 else ((abs_w * 3 + 3) // 4) * 4
 
-            rows = []
-            for y in range(abs_h):
-                actual_y = y if is_top_down else (abs_h - 1 - y)
-                row_off = offset + actual_y * stride
-                line = []
-                ny = (y / (abs_h - 1)) if abs_h > 1 else 0
-                for x in range(abs_w):
-                    nx = (x / (abs_w - 1)) * 2 - 1 if abs_w > 1 else 0
-                    px = row_off + x * 3
-                    b, g, r = data[px], data[px+1], data[px+2]
-                    lum = 0.299 * r + 0.587 * g + 0.114 * b
+            def bmp_get_rgb(x, y):
+                ix = max(0, min(abs_w - 1, int(x)))
+                iy = max(0, min(abs_h - 1, int(y)))
+                actual_y = iy if is_top_down else (abs_h - 1 - iy)
+                pos = offset + actual_y * stride + ix * (4 if bpp == 32 else 3)
+                return bmp_data[pos + 2], bmp_data[pos + 1], bmp_data[pos]
 
-                    head_dx = (nx - 0.02) / 0.36
-                    head_dy = (ny - 0.32) / 0.30
-                    in_head = (head_dx * head_dx + head_dy * head_dy) <= 1.0
-
-                    shoulder_width = 0.40 + (ny - 0.55) * 1.3
-                    in_shoulders = (ny >= 0.55) and (abs(nx - 0.02) <= shoulder_width)
-
-                    if not (in_head or in_shoulders):
-                        line.append(' ')
-                    else:
-                        inv = 1.0 - (lum / 255.0)
-                        inv = math.pow(inv, 1.25)
-                        idx = int(inv * (len(CHARS) - 1))
-                        idx = max(0, min(len(CHARS) - 1, idx))
-                        line.append(CHARS[idx])
-                rows.append("".join(line))
+            rows = build_rows_from_accessor(abs_w, abs_h, bmp_get_rgb)
             with open(ascii_cache_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(rows))
             return rows
     except Exception:
         pass
 
-    # 3. Fallback to cached ascii portrait file if present
-    if os.path.exists(ascii_cache_path):
-        try:
-            with open(ascii_cache_path, "r", encoding="utf-8") as f:
-                cached = [line.rstrip("\r\n") for line in f]
-                if len(cached) == height:
-                    return cached
-        except Exception:
-            pass
+    # 3. Fallback to cached file
+    if cached_rows:
+        return cached_rows
 
     return [" " * width for _ in range(height)]
 
@@ -391,9 +450,10 @@ def generate_avatar_ascii(width=60, height=38):
 # ---------------------------------------------------------------------------
 
 def render_hero_card():
-    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta-nu.vercel.app ↗"
+    ascii_rows = generate_avatar_ascii(width=56, height=38)
+    ascii_chars = "".join(set("".join(ascii_rows)))
+    text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta-nu.vercel.app ↗ " + ascii_chars
     font_css = build_font_css(text_corpus)
-    ascii_rows = generate_avatar_ascii(width=60, height=38)
 
     # Use pure opacity keyframes so coordinates never get clobbered by CSS transforms!
     anim_css = "" if IS_STATIC else """
