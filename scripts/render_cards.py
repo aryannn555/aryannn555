@@ -83,6 +83,7 @@ def build_font_css(subset_chars):
     serif_b64 = get_subset_font_b64("InstrumentSerif-Regular.ttf", subset_chars)
     brico_b64 = get_subset_font_b64("BricolageGrotesque.ttf", subset_chars)
     geist_b64 = get_subset_font_b64("Geist-Regular.ttf", subset_chars)
+    mono_b64 = get_subset_font_b64("GeistMono-Regular.ttf", subset_chars)
 
     css_parts = []
     if serif_b64:
@@ -112,10 +113,20 @@ def build_font_css(subset_chars):
       src: url('data:font/woff;base64,{geist_b64}') format('woff');
     }}""")
 
+    if mono_b64:
+        css_parts.append(f"""
+    @font-face {{
+      font-family: 'Geist Mono';
+      font-style: normal;
+      font-weight: 500;
+      src: url('data:font/woff;base64,{mono_b64}') format('woff');
+    }}""")
+
     css_parts.append("""
     .serif { font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; }
     .brico { font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, sans-serif; }
-    .geist { font-family: 'Geist', 'SFMono-Regular', Consolas, Menlo, monospace; }
+    .geist { font-family: 'Geist', system-ui, -apple-system, sans-serif; }
+    .mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace; }
     .sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     """)
 
@@ -273,12 +284,11 @@ def load_or_fetch_contributions():
 # SILHOUETTE ASCII PORTRAIT GENERATOR (For Hero Card)
 # ---------------------------------------------------------------------------
 
-def generate_avatar_ascii(width=56, height=38):
+def generate_avatar_ascii(width=58, height=38):
     """
     Renders high-definition editorial portrait ASCII art matching Avi Vashishta's style:
-    - Tight crop on head, curly hair, glasses frames, eyes, smile, jawline, and collar
-    - Multi-scale Sobel edge detection to sharply carve out rectangular glasses rims, nose, and lips
-    - Curly textured hair volume with open, clean luminous skin tone (zero background noise)
+    - Tight crop on head, curly hair, aviator wire glasses, smile with teeth, jawline, and collar
+    - Crisp line-art and clean luminous skin stippling (zero background noise)
     - Saves and caches result in assets/avatar_ascii.txt
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
@@ -289,7 +299,7 @@ def generate_avatar_ascii(width=56, height=38):
         try:
             with open(ascii_cache_path, "r", encoding="utf-8") as f:
                 lines = [l.rstrip("\r\n") for l in f]
-                if len(lines) == height:
+                if len(lines) == height and len(lines[0]) == width:
                     cached_rows = lines
         except Exception:
             pass
@@ -299,10 +309,36 @@ def generate_avatar_ascii(width=56, height=38):
             r, g, b = get_rgb_fn(x, y)
             return 0.299 * r + 0.587 * g + 0.114 * b
 
-        crop_x0 = 100.0
-        crop_x1 = 335.0
-        crop_y0 = 30.0
-        crop_y1 = 345.0
+        def is_inside_silhouette(x, y):
+            if y < 75 or y > 665:
+                return False
+            if 75 <= y < 135:
+                return 270 <= x <= 500
+            elif 135 <= y < 225:
+                return 215 <= x <= 555
+            elif 225 <= y < 275:
+                return 225 <= x <= 545
+            elif 275 <= y < 330:
+                return 245 <= x <= 525
+            elif 330 <= y < 390:
+                return 245 <= x <= 525
+            elif 390 <= y < 440:
+                return 260 <= x <= 505
+            elif 440 <= y < 500:
+                t = (y - 440) / 60.0
+                return (275 + t * 45) <= x <= (495 - t * 45)
+            elif 500 <= y < 540:
+                t = (y - 500) / 40.0
+                return (320 + t * 25) <= x <= (450 - t * 25)
+            elif 540 <= y <= 665:
+                t = (y - 540) / 125.0
+                return (340 - t * 20) <= x <= (430 + t * 25)
+            return False
+
+        crop_x0 = 195.0
+        crop_x1 = 575.0
+        crop_y0 = 70.0
+        crop_y1 = 665.0
 
         rows = []
         for out_y in range(height):
@@ -311,87 +347,105 @@ def generate_avatar_ascii(width=56, height=38):
             for out_x in range(width):
                 sx = crop_x0 + (out_x / (width - 1)) * (crop_x1 - crop_x0)
 
-                nx = (sx - 217.0) / 90.0
-                ny = (sy - 175.0) / 130.0
-
-                in_hair_box = (ny >= -1.12 and ny <= -0.15 and nx >= -0.85 and nx <= 0.95)
-                in_face_upper = (ny > -0.15 and ny <= 0.35 and nx >= -0.90 and nx <= 0.90)
-                jaw_w = 0.85 - (ny - 0.35) * 0.70
-                in_jaw = (ny > 0.35 and ny <= 0.90 and abs(nx + 0.04) <= jaw_w)
-                in_neck = (ny > 0.90 and ny <= 1.32 and nx >= -0.38 and nx <= 0.35)
-
-                in_silhouette = in_hair_box or in_face_upper or in_jaw or in_neck
-
-                if not in_silhouette:
+                if not is_inside_silhouette(sx, sy):
                     line.append(" ")
                     continue
 
                 r, g, b = get_rgb_fn(sx, sy)
-                lum = 0.299 * r + 0.587 * g + 0.114 * b
+                lum = get_lum(sx, sy)
 
-                gx = (get_lum(sx + 2, sy - 2) + 2 * get_lum(sx + 2, sy) + get_lum(sx + 2, sy + 2) -
-                     (get_lum(sx - 2, sy - 2) + 2 * get_lum(sx - 2, sy) + get_lum(sx - 2, sy + 2))) / 8.0
-                gy = (get_lum(sx - 2, sy + 2) + 2 * get_lum(sx, sy + 2) + get_lum(sx + 2, sy + 2) -
-                     (get_lum(sx - 2, sy - 2) + 2 * get_lum(sx, sy - 2) + get_lum(sx + 2, sy - 2))) / 8.0
+                gx = (get_lum(sx + 3, sy) - get_lum(sx - 3, sy)) / 2.0
+                gy = (get_lum(sx, sy + 3) - get_lum(sx, sy - 3)) / 2.0
                 edge = math.sqrt(gx * gx + gy * gy)
 
-                is_hair = (ny < -0.35 and lum < 80) or (ny < -0.10 and lum < 55) or (abs(nx) > 0.78 and ny < 0.25 and lum < 75)
+                is_hair_top = (sy < 225)
+                is_hair_forehead_l = (sy < 265 and sx < 290)
+                is_hair_forehead_r = (sy < 265 and sx > 475)
+                is_hair_side_l = (265 <= sy < 310 and sx < 260)
+                is_hair_side_r = (265 <= sy < 310 and sx > 505 and lum < 60)
+
+                is_hair = (is_hair_top or is_hair_forehead_l or is_hair_forehead_r or is_hair_side_l or is_hair_side_r) and (lum < 95)
 
                 if is_hair:
-                    if lum < 38:
+                    if lum < 32:
                         line.append("@" if (out_x + out_y) % 2 == 0 else "#")
-                    elif lum < 52:
-                        line.append("#" if edge > 16 else "%")
-                    elif lum < 70:
+                    elif lum < 50:
+                        line.append("#" if edge > 14 else "%")
+                    elif lum < 72:
                         line.append("*" if edge > 12 else "+")
                     else:
                         line.append(":")
-                elif in_neck:
-                    if abs(nx + 0.02) > 0.28 and edge > 16:
+                    continue
+
+                if sy >= 540:
+                    t = (sy - 540) / 125.0
+                    left_neck = 340 - t * 20
+                    right_neck = 430 + t * 25
+                    is_neck_edge = (abs(sx - left_neck) < 14) or (abs(sx - right_neck) < 14)
+                    is_shirt = (sy >= 610 and r > 140 and b > 160)
+
+                    if is_neck_edge:
                         line.append("|")
-                    elif sy > 310 and (r > 150 and b > 175):
-                        line.append("-" if abs(nx) < 0.2 else "/")
-                    elif edge > 22:
-                        line.append(":" if abs(gx) > abs(gy) else "-")
-                    else:
-                        line.append(" ")
-                else:
-                    if 200 <= sx <= 236 and 132 <= sy <= 148 and lum < 130:
-                        line.append("=" if abs(gy) > abs(gx) * 0.7 else "-")
-                    elif ((135 <= sx <= 198 and 126 <= sy <= 164) or (238 <= sx <= 302 and 126 <= sy <= 164)) and (lum < 95 or edge > 38):
-                        if lum < 55:
-                            line.append("#")
-                        elif edge > 42:
-                            line.append("|" if abs(gx) > abs(gy) * 1.3 else "=")
-                        else:
-                            line.append(":")
-                    elif 235 <= sy <= 270 and 180 <= sx <= 255:
-                        if lum < 125 or edge > 32:
-                            line.append("=" if abs(gy) > abs(gx) else "-")
-                        elif lum > 175 and abs(r - g) < 25:
-                            line.append(".")
-                        else:
+                    elif is_shirt:
+                        if sy > 640 and abs(sx - 385) < 14:
                             line.append(" ")
-                    elif 165 <= sy <= 230 and 208 <= sx <= 235:
-                        if edge > 24 and lum < 155:
-                            line.append("|" if abs(gx) > abs(gy) else ":")
+                        elif edge > 16:
+                            line.append("/" if sx < 385 else "\\")
                         else:
-                            line.append(" ")
-                    elif 112 <= sy <= 126 and ((140 <= sx <= 195) or (240 <= sx <= 295)) and lum < 90:
-                        line.append("~" if abs(gy) > abs(gx) else "=")
-                    elif (abs(abs(nx + 0.03) - (0.90 - (ny - 0.25) * 0.75)) < 0.07 and edge > 15) or (edge > 32 and lum < 140):
-                        line.append("|" if abs(gx) > abs(gy) else "-")
-                    elif edge > 22 and lum < 120:
+                            line.append("-")
+                    elif edge > 18:
                         line.append(":")
                     else:
-                        if lum > 210:
-                            line.append(".")
-                        elif lum > 185:
-                            line.append(".")
-                        elif lum > 160:
-                            line.append(":")
-                        else:
-                            line.append(".")
+                        line.append("." if lum > 160 else ":")
+                    continue
+
+                is_brow_bar = (248 <= sx <= 512 and 296 <= sy <= 316 and (lum < 145 or edge > 20))
+                is_bridge = (360 <= sx <= 400 and 336 <= sy <= 358 and lum < 140)
+                in_l_frame = (248 <= sx <= 360 and 305 <= sy <= 405)
+                in_r_frame = (400 <= sx <= 512 and 305 <= sy <= 405)
+
+                is_eyebrow = (260 <= sy <= 292 and ((255 <= sx <= 345) or (410 <= sx <= 500)) and lum < 95)
+                is_smile_zone = (415 <= sy <= 475 and 325 <= sx <= 445)
+                is_nose_zone = (350 <= sy <= 405 and 365 <= sx <= 405)
+
+                if is_brow_bar:
+                    line.append("=" if abs(gy) > abs(gx) * 0.6 else "-")
+                elif is_bridge:
+                    line.append("=" if abs(gy) > abs(gx) * 0.6 else "#")
+                elif is_eyebrow:
+                    line.append("~" if edge > 18 else "=")
+                elif (in_l_frame or in_r_frame) and (lum < 95 or edge > 30):
+                    if lum < 55:
+                        line.append("@")
+                    elif edge > 36:
+                        line.append("|" if abs(gx) > abs(gy) * 1.2 else "=")
+                    else:
+                        line.append("*")
+                elif is_smile_zone:
+                    if 430 <= sy <= 450 and 345 <= sx <= 425 and lum > 170:
+                        line.append(" ")
+                    elif lum < 135 or edge > 22:
+                        line.append("=" if abs(gy) > abs(gx) else "-")
+                    else:
+                        line.append(".")
+                elif is_nose_zone:
+                    if lum < 130 or edge > 20:
+                        line.append("|" if abs(gx) > abs(gy) else ":")
+                    else:
+                        line.append(".")
+                elif edge > 24 and lum < 145:
+                    line.append("|" if abs(gx) > abs(gy) else "-")
+                elif edge > 16:
+                    line.append(":")
+                else:
+                    if lum > 215:
+                        line.append(" ")
+                    elif lum > 180:
+                        line.append(".")
+                    elif lum > 150:
+                        line.append(".")
+                    else:
+                        line.append(":")
             rows.append("".join(line))
         return rows
 
@@ -408,7 +462,7 @@ def generate_avatar_ascii(width=56, height=38):
                 return px_data[ix, iy]
             rows = build_rows_from_accessor(w, h, pil_get_rgb)
             with open(ascii_cache_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(rows))
+                f.write("\n".join(rows) + "\n")
             return rows
     except Exception:
         pass
@@ -440,7 +494,7 @@ def generate_avatar_ascii(width=56, height=38):
 
             rows = build_rows_from_accessor(abs_w, abs_h, bmp_get_rgb)
             with open(ascii_cache_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(rows))
+                f.write("\n".join(rows) + "\n")
             return rows
     except Exception:
         pass
@@ -457,7 +511,7 @@ def generate_avatar_ascii(width=56, height=38):
 # ---------------------------------------------------------------------------
 
 def render_hero_card():
-    ascii_rows = generate_avatar_ascii(width=56, height=38)
+    ascii_rows = generate_avatar_ascii(width=58, height=38)
     ascii_chars = "".join(set("".join(ascii_rows)))
     text_corpus = "Aryan Gupta Building things that don't break at 3 AM. Solo developer & CS student who builds with AI and ships anyway. FULLSTACK AUDIO ENGINEER CREATOR OF SVARIX aryangupta-nu.vercel.app ↗ " + ascii_chars
     font_css = build_font_css(text_corpus)
@@ -501,10 +555,10 @@ def render_hero_card():
         f'    <text class="geist" x="42" y="318" font-size="13" font-weight="600" fill="{COLOR_SKY}">aryangupta-nu.vercel.app ↗</text>',
         f'  </g>',
         '',
-        '  <!-- High-Density Silhouette ASCII Portrait -->'
+        '  <!-- High-Density Silhouette ASCII Portrait -->',
     ]
 
-    start_x = 510
+    start_x = 515
     start_y = 36
     step_y = 8.1
 
@@ -512,14 +566,14 @@ def render_hero_card():
         d = "0s" if IS_STATIC else f"{round(0.08 + idx * 0.012, 3)}s"
         esc = html.escape(r)
         svg.append(
-            f'  <text class="geist ascii-row" x="{start_x}" y="{round(start_y + idx * step_y, 1)}" fill="{COLOR_INK}" font-size="7.6" font-weight="600" xml:space="preserve" style="animation-delay: {d};">{esc}</text>'
+            f'  <text class="mono ascii-row" x="{start_x}" y="{round(start_y + idx * step_y, 1)}" fill="{COLOR_INK}" font-size="7.4" font-weight="500" xml:space="preserve" style="animation-delay: {d};">{esc}</text>'
         )
 
     svg.append('</svg>')
 
     out_path = os.path.join(CARDS_DIR, "hero.svg")
     with open(out_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(svg))
+        f.write("\n".join(svg) + "\n")
     print(f"Generated {out_path}")
 
 
