@@ -379,12 +379,19 @@ def generate_avatar_ascii(width=56, height=38):
                             line.append(" ")
                     elif 112 <= sy <= 126 and ((140 <= sx <= 195) or (240 <= sx <= 295)) and lum < 90:
                         line.append("~" if abs(gy) > abs(gx) else "=")
-                    elif (abs(abs(nx + 0.04) - jaw_w) < 0.08 and edge > 15) or (edge > 36 and lum < 140):
+                    elif (abs(abs(nx + 0.03) - (0.90 - (ny - 0.25) * 0.75)) < 0.07 and edge > 15) or (edge > 32 and lum < 140):
                         line.append("|" if abs(gx) > abs(gy) else "-")
-                    elif edge > 20 and lum < 130:
+                    elif edge > 22 and lum < 120:
                         line.append(":")
                     else:
-                        line.append(" ")
+                        if lum > 210:
+                            line.append(".")
+                        elif lum > 185:
+                            line.append(".")
+                        elif lum > 160:
+                            line.append(":")
+                        else:
+                            line.append(".")
             rows.append("".join(line))
         return rows
 
