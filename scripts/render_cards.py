@@ -16,7 +16,7 @@ import struct
 import io
 import base64
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import urllib.request
 import urllib.error
 
@@ -149,132 +149,215 @@ def build_font_css(subset_chars):
 # ---------------------------------------------------------------------------
 
 def load_or_fetch_contributions():
+    """
+    Loads contributions from data/contributions.json and refreshes live data via GitHub GraphQL API.
+    Uses smart calendar merging:
+    - If GH_PAT is present, queries viewer for complete private + public contributions.
+    - If GITHUB_TOKEN is present, queries user(login: "aryannn555") and merges live counts with local baseline.
+    - Never wipes out historical private contributions (uses max(local_day, live_day)).
+    - Automatically rolls the 365-day calendar forward to today's date every single day.
+    - Computes rolling streaks, active days, peak month, and busiest day.
+    - Saves updated data to data/contributions.json so GitHub Actions commits refreshed cards daily.
+    """
     json_path = os.path.join(DATA_DIR, "contributions.json")
     local_data = None
+    local_map = {}
     if os.path.exists(json_path):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 local_data = json.load(f)
-        except Exception:
+            if local_data and "weeks" in local_data:
+                for w in local_data["weeks"]:
+                    for d in w.get("contributionDays", []):
+                        local_map[d["date"]] = d.get("contributionCount", 0)
+        except Exception as e:
+            print(f"Notice: local contributions cache read failed ({e})")
             local_data = None
 
-    token = os.environ.get("GH_PAT") or os.environ.get("PAT_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    pat_token = os.environ.get("GH_PAT") or os.environ.get("PAT_TOKEN")
+    repo_token = os.environ.get("GITHUB_TOKEN")
+    token = pat_token or repo_token
+
+    fetched_weeks = None
     if token:
-        try:
-            query = """
-            query($login: String!) {
-              user(login: $login) {
-                contributionsCollection {
-                  contributionCalendar {
-                    totalContributions
-                    weeks {
-                      contributionDays {
-                        contributionCount
-                        date
-                        weekday
+        # 1. Try querying viewer if PAT is provided (sees private + public repos)
+        if pat_token:
+            try:
+                viewer_query = """
+                query {
+                  viewer {
+                    contributionsCollection {
+                      contributionCalendar {
+                        totalContributions
+                        weeks {
+                          contributionDays {
+                            contributionCount
+                            date
+                            weekday
+                          }
+                        }
                       }
                     }
                   }
                 }
-              }
-            }
-            """
-            req = urllib.request.Request(
-                "https://api.github.com/graphql",
-                data=json.dumps({"query": query, "variables": {"login": "aryannn555"}}).encode("utf-8"),
-                headers={
-                    "Authorization": f"Bearer {token}",
-                    "User-Agent": "GitHub-Cards-Renderer",
-                    "Content-Type": "application/json"
+                """
+                req = urllib.request.Request(
+                    "https://api.github.com/graphql",
+                    data=json.dumps({"query": viewer_query}).encode("utf-8"),
+                    headers={
+                        "Authorization": f"Bearer {pat_token}",
+                        "User-Agent": "GitHub-Cards-Renderer",
+                        "Content-Type": "application/json"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    res_json = json.loads(resp.read().decode("utf-8"))
+                    if "data" in res_json and res_json["data"].get("viewer"):
+                        cal = res_json["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]
+                        fetched_weeks = cal["weeks"]
+                        print(f"Successfully fetched full viewer contributions via GH_PAT ({cal.get('totalContributions')} contributions)")
+            except Exception as e:
+                print(f"Viewer GraphQL query with PAT failed ({e}); falling back to user query")
+
+        # 2. Query user(login: "aryannn555")
+        if not fetched_weeks:
+            try:
+                user_query = """
+                query($login: String!) {
+                  user(login: $login) {
+                    contributionsCollection {
+                      contributionCalendar {
+                        totalContributions
+                        weeks {
+                          contributionDays {
+                            contributionCount
+                            date
+                            weekday
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
-            )
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                cal = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
-                weeks = cal["weeks"]
-                total = cal["totalContributions"]
-                
-                # Check if fetched total is lower than our baseline local total (which includes private contributions)
-                local_total = local_data.get("total_contributions", 0) if local_data else 0
-                if local_data and total < local_total:
-                    print(f"GraphQL returned {total} contributions (public only); keeping local baseline of {local_total} contributions (including private contributions).")
-                    return local_data
-                
-                active_days = 0
-                longest = 0
-                current = 0
-                running = 0
-                busiest_count = 0
-                busiest_date = ""
+                """
+                req = urllib.request.Request(
+                    "https://api.github.com/graphql",
+                    data=json.dumps({"query": user_query, "variables": {"login": "aryannn555"}}).encode("utf-8"),
+                    headers={
+                        "Authorization": f"Bearer {token}",
+                        "User-Agent": "GitHub-Cards-Renderer",
+                        "Content-Type": "application/json"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    res_json = json.loads(resp.read().decode("utf-8"))
+                    if "data" in res_json and res_json["data"].get("user"):
+                        cal = res_json["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+                        fetched_weeks = cal["weeks"]
+                        print(f"Fetched user contributions via GraphQL ({cal.get('totalContributions')} contributions)")
+            except Exception as e:
+                print(f"User GraphQL query failed ({e})")
 
-                all_days = []
-                for w in weeks:
-                    for d in w["contributionDays"]:
-                        all_days.append(d)
-                        c = d["contributionCount"]
-                        if c > 0:
-                            active_days += 1
-                            if c > busiest_count:
-                                busiest_count = c
-                                busiest_date = d["date"]
+    # 3. Merge fetched calendar into local calendar baseline
+    if fetched_weeks:
+        merged_weeks = []
+        all_days = []
+        total_count = 0
+        active_days = 0
+        busiest_count = 0
+        busiest_date = ""
 
-                for day in all_days:
-                    if day["contributionCount"] > 0:
-                        running += 1
-                        if running > longest:
-                            longest = running
-                    else:
-                        running = 0
-
-                for day in reversed(all_days):
-                    if day["contributionCount"] > 0:
-                        current += 1
-                    elif current > 0:
-                        break
-
-                month_totals = {}
-                months_order = ["Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]
-                for d in all_days:
-                    dt = datetime.strptime(d["date"], "%Y-%m-%d")
-                    m_label = dt.strftime("%b")
-                    month_totals[m_label] = month_totals.get(m_label, 0) + d["contributionCount"]
-
-                max_m = max(month_totals.values()) if month_totals else 1
-                months_list = []
-                for m in months_order:
-                    cnt = month_totals.get(m, 0)
-                    months_list.append({"label": m, "count": cnt, "is_peak": (cnt == max_m and cnt > 0)})
-
-                record = {
-                    "username": "aryannn555",
-                    "updated_at": datetime.now().isoformat() + "Z",
-                    "total_contributions": total,
-                    "current_streak": current,
-                    "longest_streak": longest,
-                    "active_days": active_days,
-                    "total_days": len(all_days),
-                    "busiest_day": {"date": busiest_date, "count": busiest_count},
-                    "months": months_list,
-                    "weeks": weeks
+        for w in fetched_weeks:
+            m_days = []
+            for d in w["contributionDays"]:
+                dt = d["date"]
+                cnt = max(local_map.get(dt, 0), d["contributionCount"])
+                m_day = {
+                    "contributionCount": cnt,
+                    "date": dt,
+                    "weekday": d["weekday"]
                 }
-                with open(json_path, "w", encoding="utf-8") as f:
-                    json.dump(record, f, indent=2)
-                print("Fetched live contributions via GraphQL and saved to data/contributions.json")
-                return record
+                m_days.append(m_day)
+                all_days.append(m_day)
+                total_count += cnt
+                if cnt > 0:
+                    active_days += 1
+                    if cnt > busiest_count:
+                        busiest_count = cnt
+                        busiest_date = dt
+            merged_weeks.append({"contributionDays": m_days})
+
+        # Generate rolling 12 months sequence ending at current month
+        now = datetime.now()
+        months_order = []
+        for i in range(11, -1, -1):
+            m = (now.month - i - 1) % 12 + 1
+            months_order.append(datetime(2000, m, 1).strftime("%b"))
+
+        month_totals = {}
+        for d in all_days:
+            dt = datetime.strptime(d["date"], "%Y-%m-%d")
+            m_label = dt.strftime("%b")
+            month_totals[m_label] = month_totals.get(m_label, 0) + d["contributionCount"]
+
+        max_m = max(month_totals.values()) if month_totals else 1
+        months_list = []
+        for m in months_order:
+            cnt = month_totals.get(m, 0)
+            months_list.append({"label": m, "count": cnt, "is_peak": (cnt == max_m and cnt > 0)})
+
+        # Compute streak (don't break on today if today has 0 so far)
+        check_idx = len(all_days) - 1
+        if all_days[check_idx]["contributionCount"] == 0 and check_idx > 0:
+            check_idx -= 1
+        cur_streak = 0
+        while check_idx >= 0 and all_days[check_idx]["contributionCount"] > 0:
+            cur_streak += 1
+            check_idx -= 1
+
+        longest = 0
+        run = 0
+        for d in all_days:
+            if d["contributionCount"] > 0:
+                run += 1
+                if run > longest:
+                    longest = run
+            else:
+                run = 0
+
+        record = {
+            "username": "aryannn555",
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "total_contributions": total_count,
+            "current_streak": cur_streak,
+            "longest_streak": longest,
+            "active_days": active_days,
+            "total_days": len(all_days),
+            "busiest_day": {"date": busiest_date, "count": busiest_count},
+            "months": months_list,
+            "weeks": merged_weeks
+        }
+
+        try:
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(record, f, indent=2)
+            print(f"Updated {json_path} successfully ({total_count} total contributions, {cur_streak} streak, rolling to {all_days[-1]['date']})")
         except Exception as e:
-            print(f"GraphQL fetch failed ({e}); falling back to local JSON cache.")
+            print(f"Warning: writing {json_path} failed ({e})")
+
+        return record
 
     if local_data:
         return local_data
 
     return {
         "username": "aryannn555",
-        "total_contributions": 190,
-        "current_streak": 5,
-        "longest_streak": 10,
-        "active_days": 56,
+        "total_contributions": 194,
+        "current_streak": 0,
+        "longest_streak": 4,
+        "active_days": 37,
         "total_days": 365,
-        "busiest_day": {"date": "2026-11-11", "count": 17},
+        "busiest_day": {"date": "2026-10-31", "count": 29},
         "months": [{"label": m, "count": 15, "is_peak": m == "Sep"} for m in ["Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"]],
         "weeks": []
     }

@@ -2,9 +2,17 @@ name: Refresh Animated Profile Cards
 
 on:
   schedule:
-    # Run automatically every day at 00:00 UTC
-    - cron: '0 0 * * *'
+    # Run automatically every 4 hours so stats stay fresh throughout the day
+    - cron: '15 */4 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+      - 'fonts/**'
+      - 'data/**'
+      - 'assets/**'
 
 permissions:
   contents: write
@@ -29,6 +37,7 @@ jobs:
 
       - name: Render Animated SVG Cards
         env:
+          GH_PAT: ${{ secrets.GH_PAT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 scripts/render_cards.py
