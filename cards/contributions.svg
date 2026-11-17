@@ -400,9 +400,9 @@
   <rect class="cell" x="756.4" y="142.0" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.218s;" />
   <rect class="cell" x="756.4" y="157.2" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.227s;" />
   <rect class="cell" x="771.6" y="66.0" width="11.2" height="11.2" rx="3" fill="#60A5FA" style="animation-delay: 2.182s;" />
-  <rect class="cell" x="771.6" y="81.2" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.191s;" />
-  <rect class="cell" x="771.6" y="96.4" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.2s;" />
-  <rect class="cell" x="771.6" y="111.6" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.209s;" />
+  <rect class="cell" x="771.6" y="81.2" width="11.2" height="11.2" rx="3" fill="#60A5FA" style="animation-delay: 2.191s;" />
+  <rect class="cell" x="771.6" y="96.4" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.2s;" />
+  <rect class="cell" x="771.6" y="111.6" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.209s;" />
   <rect class="cell" x="771.6" y="126.8" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.218s;" />
   <rect class="cell" x="771.6" y="142.0" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.227s;" />
   <rect class="cell" x="771.6" y="157.2" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.236s;" />
@@ -419,16 +419,16 @@
   <rect class="cell" x="802.0" y="111.6" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.227s;" />
   <rect class="cell" x="802.0" y="126.8" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.236s;" />
   <rect class="cell" x="802.0" y="142.0" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.245s;" />
-  <rect class="cell" x="802.0" y="157.2" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.254s;" />
+  <rect class="cell" x="802.0" y="157.2" width="11.2" height="11.2" rx="3" fill="#60A5FA" style="animation-delay: 2.254s;" />
   <rect class="cell" x="817.2" y="66.0" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.209s;" />
   <rect class="cell" x="817.2" y="81.2" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.218s;" />
-  <rect class="cell" x="817.2" y="96.4" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.227s;" />
+  <rect class="cell" x="817.2" y="96.4" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.227s;" />
   <rect class="cell" x="817.2" y="111.6" width="11.2" height="11.2" rx="3" fill="#1D4ED8" style="animation-delay: 2.236s;" />
-  <rect class="cell" x="817.2" y="126.8" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.245s;" />
-  <rect class="cell" x="817.2" y="142.0" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.254s;" />
+  <rect class="cell" x="817.2" y="126.8" width="11.2" height="11.2" rx="3" fill="#BAE6FD" style="animation-delay: 2.245s;" />
+  <rect class="cell" x="817.2" y="142.0" width="11.2" height="11.2" rx="3" fill="#1D4ED8" style="animation-delay: 2.254s;" />
   <rect class="cell" x="817.2" y="157.2" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.263s;" />
   <rect class="cell" x="832.4" y="66.0" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.218s;" />
-  <rect class="cell" x="832.4" y="81.2" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.227s;" />
+  <rect class="cell" x="832.4" y="81.2" width="11.2" height="11.2" rx="3" fill="#2F7FD8" style="animation-delay: 2.227s;" />
   <rect class="cell" x="832.4" y="96.4" width="11.2" height="11.2" rx="3" fill="#E8EEF5" style="animation-delay: 2.236s;" />
 
   <text class="geist" x="42.0" y="186" fill="#4B5D72" font-size="10.5">Nov</text>

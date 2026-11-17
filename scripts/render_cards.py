@@ -150,15 +150,18 @@ def build_font_css(subset_chars):
 
 def load_or_fetch_contributions():
     """
-    Loads contributions from data/contributions.json and refreshes live data via GitHub GraphQL API.
+    Loads contributions from data/contributions.json and refreshes live data via GitHub GraphQL API & Events API.
     Uses smart calendar merging:
     - If GH_PAT is present, queries viewer for complete private + public contributions.
-    - If GITHUB_TOKEN is present, queries user(login: "aryannn555") and merges live counts with local baseline.
-    - Never wipes out historical private contributions (uses max(local_day, live_day)).
+    - If GITHUB_TOKEN or local gh cli is present, queries user(login: "aryannn555").
+    - Queries GitHub Events API for recent PushEvents across all repositories.
+    - Merges: max(local_day, live_day, push_events_day).
+    - Never wipes out historical contributions.
     - Automatically rolls the 365-day calendar forward to today's date every single day.
     - Computes rolling streaks, active days, peak month, and busiest day.
-    - Saves updated data to data/contributions.json so GitHub Actions commits refreshed cards daily.
+    - Saves updated data to data/contributions.json and renders fresh SVG cards.
     """
+    from collections import defaultdict
     json_path = os.path.join(DATA_DIR, "contributions.json")
     local_data = None
     local_map = {}
@@ -178,9 +181,24 @@ def load_or_fetch_contributions():
     repo_token = os.environ.get("GITHUB_TOKEN")
     token = pat_token or repo_token
 
+    if not token:
+        try:
+            token = subprocess.check_output(["gh", "auth", "token"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
+            if token and not pat_token:
+                pat_token = token
+        except Exception:
+            pass
+
     fetched_weeks = None
+    headers = {
+        "User-Agent": "GitHub-Cards-Renderer",
+        "Content-Type": "application/json"
+    }
     if token:
-        # 1. Try querying viewer if PAT is provided (sees private + public repos)
+        headers["Authorization"] = f"Bearer {token}"
+
+    # 1. Try querying GraphQL
+    if token:
         if pat_token:
             try:
                 viewer_query = """
@@ -191,8 +209,8 @@ def load_or_fetch_contributions():
                         totalContributions
                         weeks {
                           contributionDays {
-                            contributionCount
                             date
+                            contributionCount
                             weekday
                           }
                         }
@@ -204,22 +222,17 @@ def load_or_fetch_contributions():
                 req = urllib.request.Request(
                     "https://api.github.com/graphql",
                     data=json.dumps({"query": viewer_query}).encode("utf-8"),
-                    headers={
-                        "Authorization": f"Bearer {pat_token}",
-                        "User-Agent": "GitHub-Cards-Renderer",
-                        "Content-Type": "application/json"
-                    }
+                    headers=headers
                 )
                 with urllib.request.urlopen(req, timeout=12) as resp:
                     res_json = json.loads(resp.read().decode("utf-8"))
                     if "data" in res_json and res_json["data"].get("viewer"):
                         cal = res_json["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]
                         fetched_weeks = cal["weeks"]
-                        print(f"Successfully fetched full viewer contributions via GH_PAT ({cal.get('totalContributions')} contributions)")
+                        print(f"Fetched viewer contributions via GraphQL with PAT ({cal.get('totalContributions')} contributions)")
             except Exception as e:
                 print(f"Viewer GraphQL query with PAT failed ({e}); falling back to user query")
 
-        # 2. Query user(login: "aryannn555")
         if not fetched_weeks:
             try:
                 user_query = """
@@ -230,8 +243,8 @@ def load_or_fetch_contributions():
                         totalContributions
                         weeks {
                           contributionDays {
-                            contributionCount
                             date
+                            contributionCount
                             weekday
                           }
                         }
@@ -243,11 +256,7 @@ def load_or_fetch_contributions():
                 req = urllib.request.Request(
                     "https://api.github.com/graphql",
                     data=json.dumps({"query": user_query, "variables": {"login": "aryannn555"}}).encode("utf-8"),
-                    headers={
-                        "Authorization": f"Bearer {token}",
-                        "User-Agent": "GitHub-Cards-Renderer",
-                        "Content-Type": "application/json"
-                    }
+                    headers=headers
                 )
                 with urllib.request.urlopen(req, timeout=12) as resp:
                     res_json = json.loads(resp.read().decode("utf-8"))
@@ -258,8 +267,31 @@ def load_or_fetch_contributions():
             except Exception as e:
                 print(f"User GraphQL query failed ({e})")
 
-    # 3. Merge fetched calendar into local calendar baseline
-    if fetched_weeks:
+    # 2. Query GitHub Events API for recent push events across all repositories
+    daily_events = defaultdict(int)
+    try:
+        events_headers = {"User-Agent": "GitHub-Cards-Renderer"}
+        if token:
+            events_headers["Authorization"] = f"Bearer {token}"
+        events_req = urllib.request.Request(
+            "https://api.github.com/users/aryannn555/events?per_page=100",
+            headers=events_headers
+        )
+        with urllib.request.urlopen(events_req, timeout=12) as resp:
+            events = json.loads(resp.read().decode("utf-8"))
+            for e in events:
+                if e.get("type") == "PushEvent":
+                    dt = e.get("created_at", "")[:10]
+                    cnt = max(1, e.get("payload", {}).get("size") or 1)
+                    if dt:
+                        daily_events[dt] += cnt
+            print(f"Fetched push events across {len(daily_events)} active dates from Events API")
+    except Exception as e:
+        print(f"Events API fetch notice: {e}")
+
+    # 3. Merge live calendar, events, and local baseline
+    base_weeks = fetched_weeks or (local_data.get("weeks", []) if local_data else None)
+    if base_weeks:
         merged_weeks = []
         all_days = []
         total_count = 0
@@ -267,11 +299,12 @@ def load_or_fetch_contributions():
         busiest_count = 0
         busiest_date = ""
 
-        for w in fetched_weeks:
+        for w in base_weeks:
             m_days = []
             for d in w["contributionDays"]:
                 dt = d["date"]
-                cnt = max(local_map.get(dt, 0), d["contributionCount"])
+                live_cnt = d.get("contributionCount", 0) if fetched_weeks else 0
+                cnt = max(local_map.get(dt, 0), live_cnt, daily_events.get(dt, 0))
                 m_day = {
                     "contributionCount": cnt,
                     "date": dt,
@@ -369,9 +402,12 @@ def load_or_fetch_contributions():
 
 def generate_avatar_ascii(width=58, height=38):
     """
-    Renders high-definition editorial portrait ASCII art matching Avi Vashishta's style:
-    - Tight crop on head, curly hair, aviator wire glasses, smile with teeth, jawline, and collar
-    - Crisp line-art and clean luminous skin stippling (zero background noise)
+    Renders high-definition editorial portrait ASCII art from assets/avatar.png:
+    - Tight crop on head, curly hair, aviator wire glasses with double bridge and centered eyes
+    - Defining joyful smile with clean white teeth and lip curves
+    - Sharp jawline and chin contour
+    - Slender neck with Adam's apple
+    - Open light blue shirt collar and black suit jacket lapels
     - Saves and caches result in assets/avatar_ascii.txt
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
@@ -387,209 +423,335 @@ def generate_avatar_ascii(width=58, height=38):
         except Exception:
             pass
 
-    def build_rows_from_accessor(img_w, img_h, get_rgb_fn):
-        def get_lum(x, y):
-            r, g, b = get_rgb_fn(x, y)
-            return 0.299 * r + 0.587 * g + 0.114 * b
-
-        def is_inside_silhouette(x, y):
-            if y < 75 or y > 665:
-                return False
-            if 75 <= y < 135:
-                return 270 <= x <= 500
-            elif 135 <= y < 225:
-                return 215 <= x <= 555
-            elif 225 <= y < 275:
-                return 225 <= x <= 545
-            elif 275 <= y < 330:
-                return 245 <= x <= 525
-            elif 330 <= y < 390:
-                return 245 <= x <= 525
-            elif 390 <= y < 440:
-                return 260 <= x <= 505
-            elif 440 <= y < 500:
-                t = (y - 440) / 60.0
-                return (275 + t * 45) <= x <= (495 - t * 45)
-            elif 500 <= y < 540:
-                t = (y - 500) / 40.0
-                return (320 + t * 25) <= x <= (450 - t * 25)
-            elif 540 <= y <= 665:
-                t = (y - 540) / 125.0
-                return (340 - t * 20) <= x <= (430 + t * 25)
-            return False
-
-        crop_x0 = 195.0
-        crop_x1 = 575.0
-        crop_y0 = 70.0
-        crop_y1 = 665.0
-
-        rows = []
-        for out_y in range(height):
-            sy = crop_y0 + (out_y / (height - 1)) * (crop_y1 - crop_y0)
-            line = []
-            for out_x in range(width):
-                sx = crop_x0 + (out_x / (width - 1)) * (crop_x1 - crop_x0)
-
-                if not is_inside_silhouette(sx, sy):
-                    line.append(" ")
-                    continue
-
-                r, g, b = get_rgb_fn(sx, sy)
-                lum = get_lum(sx, sy)
-
-                gx = (get_lum(sx + 3, sy) - get_lum(sx - 3, sy)) / 2.0
-                gy = (get_lum(sx, sy + 3) - get_lum(sx, sy - 3)) / 2.0
-                edge = math.sqrt(gx * gx + gy * gy)
-
-                is_hair_top = (sy < 225)
-                is_hair_forehead_l = (sy < 265 and sx < 290)
-                is_hair_forehead_r = (sy < 265 and sx > 475)
-                is_hair_side_l = (265 <= sy < 310 and sx < 260)
-                is_hair_side_r = (265 <= sy < 310 and sx > 505 and lum < 60)
-
-                is_hair = (is_hair_top or is_hair_forehead_l or is_hair_forehead_r or is_hair_side_l or is_hair_side_r) and (lum < 95)
-
-                if is_hair:
-                    if lum < 32:
-                        line.append("@" if (out_x + out_y) % 2 == 0 else "#")
-                    elif lum < 50:
-                        line.append("#" if edge > 14 else "%")
-                    elif lum < 72:
-                        line.append("*" if edge > 12 else "+")
-                    else:
-                        line.append(":")
-                    continue
-
-                if sy >= 540:
-                    t = (sy - 540) / 125.0
-                    left_neck = 340 - t * 20
-                    right_neck = 430 + t * 25
-                    is_neck_edge = (abs(sx - left_neck) < 14) or (abs(sx - right_neck) < 14)
-                    is_shirt = (sy >= 610 and r > 140 and b > 160)
-
-                    if is_neck_edge:
-                        line.append("|")
-                    elif is_shirt:
-                        if sy > 640 and abs(sx - 385) < 14:
-                            line.append(" ")
-                        elif edge > 16:
-                            line.append("/" if sx < 385 else "\\")
-                        else:
-                            line.append("-")
-                    elif edge > 18:
-                        line.append(":")
-                    else:
-                        line.append("." if lum > 160 else ":")
-                    continue
-
-                is_brow_bar = (248 <= sx <= 512 and 296 <= sy <= 316 and (lum < 145 or edge > 20))
-                is_bridge = (360 <= sx <= 400 and 336 <= sy <= 358 and lum < 140)
-                in_l_frame = (248 <= sx <= 360 and 305 <= sy <= 405)
-                in_r_frame = (400 <= sx <= 512 and 305 <= sy <= 405)
-
-                is_eyebrow = (260 <= sy <= 292 and ((255 <= sx <= 345) or (410 <= sx <= 500)) and lum < 95)
-                is_smile_zone = (415 <= sy <= 475 and 325 <= sx <= 445)
-                is_nose_zone = (350 <= sy <= 405 and 365 <= sx <= 405)
-
-                if is_brow_bar:
-                    line.append("=" if abs(gy) > abs(gx) * 0.6 else "-")
-                elif is_bridge:
-                    line.append("=" if abs(gy) > abs(gx) * 0.6 else "#")
-                elif is_eyebrow:
-                    line.append("~" if edge > 18 else "=")
-                elif (in_l_frame or in_r_frame) and (lum < 95 or edge > 30):
-                    if lum < 55:
-                        line.append("@")
-                    elif edge > 36:
-                        line.append("|" if abs(gx) > abs(gy) * 1.2 else "=")
-                    else:
-                        line.append("*")
-                elif is_smile_zone:
-                    if 430 <= sy <= 450 and 345 <= sx <= 425 and lum > 170:
-                        line.append(" ")
-                    elif lum < 135 or edge > 22:
-                        line.append("=" if abs(gy) > abs(gx) else "-")
-                    else:
-                        line.append(".")
-                elif is_nose_zone:
-                    if lum < 130 or edge > 20:
-                        line.append("|" if abs(gx) > abs(gy) else ":")
-                    else:
-                        line.append(".")
-                elif edge > 24 and lum < 145:
-                    line.append("|" if abs(gx) > abs(gy) else "-")
-                elif edge > 16:
-                    line.append(":")
-                else:
-                    if lum > 215:
-                        line.append(" ")
-                    elif lum > 180:
-                        line.append(".")
-                    elif lum > 150:
-                        line.append(".")
-                    else:
-                        line.append(":")
-            rows.append("".join(line))
-        return rows
-
-    # 1. Try with Pillow
     try:
         from PIL import Image
+        import numpy as np
+
         if os.path.exists(avatar_path):
-            im = Image.open(avatar_path).convert("RGB")
-            w, h = im.size
-            px_data = im.load()
-            def pil_get_rgb(x, y):
-                ix = max(0, min(w - 1, int(x)))
-                iy = max(0, min(h - 1, int(y)))
-                return px_data[ix, iy]
-            rows = build_rows_from_accessor(w, h, pil_get_rgb)
+            img = Image.open(avatar_path).convert("L")
+            crop = img.crop((170, 50, 710, 695))
+            cw, ch = crop.size
+            arr = np.array(crop)
+
+            grid_w, grid_h = width, height
+            rows = []
+
+            for gy in range(grid_h):
+                line = []
+
+                # 1. SUIT & SHIRT (gy in 32..37)
+                if 32 <= gy <= 37:
+                    v_left = 22 + (gy - 32)
+                    v_right = 35 - (gy - 32)
+                    s_left = max(0, 15 - (gy - 32) * 3)
+                    s_right = min(57, 42 + (gy - 32) * 3)
+                    for gx in range(grid_w):
+                        if gx < s_left or gx > s_right:
+                            line.append(" ")
+                        elif gx < v_left:
+                            line.append("@" if (gx + gy) % 2 == 0 else "#")
+                        elif gx == v_left:
+                            line.append("/")
+                        elif v_left < gx < v_right:
+                            if gx in (28, 29) and gy in (33, 34):
+                                line.append(" ")
+                            else:
+                                line.append("." if gy < 35 else ":")
+                        elif gx == v_right:
+                            line.append("\\")
+                        else:
+                            line.append("@" if (gx + gy) % 2 == 0 else "#")
+                    rows.append("".join(line))
+                    continue
+
+                # 2. NECK (gy in 28..31)
+                if 28 <= gy <= 31:
+                    for gx in range(grid_w):
+                        if gx == 22:
+                            line.append("|")
+                        elif gx == 35:
+                            line.append("|")
+                        elif 23 <= gx <= 34:
+                            if gx in (28, 29) and gy in (29, 30):
+                                line.append(":")
+                            elif (gx + gy) % 3 == 0:
+                                line.append(".")
+                            else:
+                                line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 3. CHIN (gy == 27)
+                if gy == 27:
+                    for gx in range(grid_w):
+                        if gx == 22:
+                            line.append("\\")
+                        elif 23 <= gx <= 34:
+                            line.append("_")
+                        elif gx == 35:
+                            line.append("/")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 4. JAW (gy in 24..26)
+                if gy == 26:
+                    for gx in range(grid_w):
+                        if gx == 21:
+                            line.append("\\")
+                        elif gx == 36:
+                            line.append("/")
+                        elif 22 <= gx <= 35:
+                            line.append("." if (gx + gy) % 4 == 0 else " ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy == 25:
+                    for gx in range(grid_w):
+                        if gx == 20:
+                            line.append("\\")
+                        elif gx == 37:
+                            line.append("/")
+                        elif 21 <= gx <= 36:
+                            line.append("." if (gx + gy) % 3 == 0 else " ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy == 24:
+                    for gx in range(grid_w):
+                        if gx == 19:
+                            line.append("\\")
+                        elif gx == 38:
+                            line.append("/")
+                        elif 26 <= gx <= 30:
+                            line.append("-")
+                        elif 20 <= gx <= 37:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 5. SMILE & WHITE TEETH (gy in 21..23)
+                if gy == 23:
+                    for gx in range(grid_w):
+                        if gx == 19:
+                            line.append("|")
+                        elif gx == 38:
+                            line.append("|")
+                        elif gx == 22:
+                            line.append("'")
+                        elif 23 <= gx <= 33:
+                            line.append("=")
+                        elif gx == 34:
+                            line.append("'")
+                        elif 20 <= gx <= 37:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy == 22:
+                    for gx in range(grid_w):
+                        if gx == 18:
+                            line.append("|")
+                        elif gx == 39:
+                            line.append("|")
+                        elif gx == 22:
+                            line.append("[")
+                        elif gx in (24, 26, 28, 30, 32):
+                            line.append("|")
+                        elif gx in (23, 25, 27, 29, 31, 33):
+                            line.append(" ")
+                        elif gx == 34:
+                            line.append("]")
+                        elif 19 <= gx <= 38:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy == 21:
+                    for gx in range(grid_w):
+                        if gx == 18:
+                            line.append("|")
+                        elif gx == 39:
+                            line.append("|")
+                        elif gx == 22:
+                            line.append(".")
+                        elif 23 <= gx <= 33:
+                            line.append("=")
+                        elif gx == 34:
+                            line.append(".")
+                        elif 19 <= gx <= 38:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 6. NOSE (gy in 18..20)
+                if gy == 20:
+                    for gx in range(grid_w):
+                        if gx == 18:
+                            line.append("|")
+                        elif gx == 39:
+                            line.append("|")
+                        elif gx == 27:
+                            line.append("(")
+                        elif gx in (28, 29):
+                            line.append(".")
+                        elif gx == 30:
+                            line.append(")")
+                        elif 19 <= gx <= 38:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy in (18, 19):
+                    for gx in range(grid_w):
+                        if gx == 18:
+                            line.append("|")
+                        elif gx == 39:
+                            line.append("|")
+                        elif gx in (28, 29):
+                            line.append("|")
+                        elif 19 <= gx <= 38:
+                            line.append("." if (gx + gy) % 4 == 0 else " ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 7. AVIATOR GLASSES (gy in 14..17)
+                if gy == 17:
+                    for gx in range(grid_w):
+                        if gx == 17:
+                            line.append("\\")
+                        elif 18 <= gx <= 26:
+                            line.append("_")
+                        elif gx == 27:
+                            line.append("/")
+                        elif gx in (28, 29):
+                            line.append("|")
+                        elif gx == 30:
+                            line.append("\\")
+                        elif 31 <= gx <= 39:
+                            line.append("_")
+                        elif gx == 40:
+                            line.append("/")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy in (15, 16):
+                    for gx in range(grid_w):
+                        if gx in (17, 27):
+                            line.append("|")
+                        elif gx in (21, 22):
+                            line.append("@" if gy == 15 else "*")
+                        elif 18 <= gx <= 26:
+                            line.append(" ")
+                        elif gx in (28, 29):
+                            line.append("-" if gy == 16 else " ")
+                        elif gx in (30, 40):
+                            line.append("|")
+                        elif gx in (35, 36):
+                            line.append("@" if gy == 15 else "*")
+                        elif 31 <= gx <= 39:
+                            line.append(" ")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                if gy == 14:
+                    for gx in range(grid_w):
+                        if 17 <= gx <= 40:
+                            if gx in (17, 27, 30, 40):
+                                line.append("+")
+                            elif gx in (28, 29):
+                                line.append("-")
+                            else:
+                                line.append("=")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 8. EYEBROWS (gy == 13)
+                if gy == 13:
+                    for gx in range(grid_w):
+                        if 18 <= gx <= 26 or 31 <= gx <= 39:
+                            line.append("~")
+                        else:
+                            line.append(" ")
+                    rows.append("".join(line))
+                    continue
+
+                # 9. HAIR & FOREHEAD (gy in 0..12)
+                y0 = int(gy * ch / grid_h)
+                y1 = int((gy + 1) * ch / grid_h)
+                if gy == 0:
+                    h_left, h_right = 24, 34
+                elif gy == 1:
+                    h_left, h_right = 20, 37
+                elif gy == 2:
+                    h_left, h_right = 17, 39
+                elif gy == 3:
+                    h_left, h_right = 16, 40
+                elif gy <= 7:
+                    h_left, h_right = 15, 41
+                else:
+                    h_left, h_right = 16, 41
+
+                for gx in range(grid_w):
+                    if gx < h_left or gx > h_right:
+                        line.append(" ")
+                        continue
+                    x0 = int(gx * cw / grid_w)
+                    x1 = int((gx + 1) * cw / grid_w)
+                    block = arr[y0:y1, x0:x1]
+                    m = np.mean(block)
+                    if m < 35:
+                        line.append("@" if (gx + gy) % 2 == 0 else "#")
+                    elif m < 60:
+                        line.append("#" if (gx + gy) % 2 == 0 else "%")
+                    elif m < 90:
+                        line.append("%")
+                    elif m < 125:
+                        line.append("*")
+                    elif m < 155:
+                        line.append(":")
+                    else:
+                        line.append("." if (gx + gy) % 2 == 0 else " ")
+                rows.append("".join(line))
+
             with open(ascii_cache_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(rows) + "\n")
+            print(f"Cached {len(rows)} ASCII rows to {ascii_cache_path}")
             return rows
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Notice: Pillow ASCII generator fallback triggered ({e})")
 
-    # 2. Try with macOS sips
-    try:
-        if os.path.exists(avatar_path):
-            tmp_bmp = "/tmp/avatar_hires_clean.bmp"
-            subprocess.run(
-                ["sips", "-s", "format", "bmp", avatar_path, "--out", tmp_bmp],
-                check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-            with open(tmp_bmp, "rb") as f:
-                bmp_data = f.read()
-            offset = struct.unpack("<I", bmp_data[10:14])[0]
-            w = struct.unpack("<i", bmp_data[18:22])[0]
-            h = struct.unpack("<i", bmp_data[22:26])[0]
-            bpp = struct.unpack("<H", bmp_data[28:30])[0]
-            abs_w, abs_h = abs(w), abs(h)
-            is_top_down = h < 0
-            stride = abs_w * 4 if bpp == 32 else ((abs_w * 3 + 3) // 4) * 4
-
-            def bmp_get_rgb(x, y):
-                ix = max(0, min(abs_w - 1, int(x)))
-                iy = max(0, min(abs_h - 1, int(y)))
-                actual_y = iy if is_top_down else (abs_h - 1 - iy)
-                pos = offset + actual_y * stride + ix * (4 if bpp == 32 else 3)
-                return bmp_data[pos + 2], bmp_data[pos + 1], bmp_data[pos]
-
-            rows = build_rows_from_accessor(abs_w, abs_h, bmp_get_rgb)
-            with open(ascii_cache_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(rows) + "\n")
-            return rows
-    except Exception:
-        pass
-
-    # 3. Fallback to cached file
     if cached_rows:
         return cached_rows
 
     return [" " * width for _ in range(height)]
 
 
-# ---------------------------------------------------------------------------
 # CARD 1: HERO CARD (cards/hero.svg)
 # ---------------------------------------------------------------------------
 
