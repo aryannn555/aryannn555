@@ -402,356 +402,80 @@ def load_or_fetch_contributions():
 
 def generate_avatar_ascii(width=58, height=38):
     """
-    Renders high-definition editorial portrait ASCII art from assets/avatar.png:
-    - Tight crop on head, curly hair, aviator wire glasses with double bridge and centered eyes
-    - Defining joyful smile with clean white teeth and lip curves
-    - Sharp jawline and chin contour
-    - Slender neck with Adam's apple
-    - Open light blue shirt collar and black suit jacket lapels
-    - Saves and caches result in assets/avatar_ascii.txt
+    Renders high-definition photographic grayscale halftone ASCII art directly from assets/avatar.png:
+    - Accurate crop of Aryan Gupta's portrait: hair, aviator glasses, smile, neck, and jacket lapels.
+    - Continuous-tone grayscale ramp (@#%xo;:,. ) for photographic shading.
+    - Clean silhouette boundary masking so background is pure cream/whitespace.
+    - Caches to assets/avatar_ascii.txt.
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
     ascii_cache_path = os.path.join(ROOT_DIR, "assets", "avatar_ascii.txt")
 
-    cached_rows = None
-    if os.path.exists(ascii_cache_path):
-        try:
-            with open(ascii_cache_path, "r", encoding="utf-8") as f:
-                lines = [l.rstrip("\r\n") for l in f]
-                if len(lines) == height and len(lines[0]) == width:
-                    cached_rows = lines
-        except Exception:
-            pass
-
     try:
-        from PIL import Image
+        from PIL import Image, ImageEnhance
         import numpy as np
 
         if os.path.exists(avatar_path):
-            img = Image.open(avatar_path).convert("L")
-            crop = img.crop((170, 50, 710, 695))
+            img = Image.open(avatar_path)
+            crop = img.crop((150, 60, 690, 710))
             cw, ch = crop.size
-            arr = np.array(crop)
+            gray = crop.convert("L")
+            enhancer = ImageEnhance.Contrast(gray)
+            contrasted = enhancer.enhance(1.25)
+            enhancer_b = ImageEnhance.Brightness(contrasted)
+            brightened = enhancer_b.enhance(1.05)
+            arr = np.array(brightened)
 
-            grid_w, grid_h = width, height
+            silhouette = [
+                (20, 38), (17, 41), (14, 44), (11, 47),
+                (9, 49), (8, 50), (8, 50), (8, 50), (8, 50), (8, 50),
+                (9, 49), (9, 49), (10, 48), (11, 47), (12, 46), (13, 45),
+                (14, 44), (15, 43), (16, 42), (18, 40), (19, 39),
+                (20, 38), (21, 37), (22, 36), (22, 36),
+                (23, 35), (23, 35), (23, 35), (23, 35), (23, 35),
+                (20, 38), (16, 42), (12, 46), (8, 50), (4, 54), (1, 57), (0, 57), (0, 57)
+            ]
+
+            RAMP = '@#%xo;:,. '
             rows = []
-
-            for gy in range(grid_h):
+            for gy in range(height):
+                y0 = int(gy * ch / height)
+                y1 = int((gy + 1) * ch / height)
+                s_min, s_max = silhouette[gy] if gy < len(silhouette) else (0, width - 1)
                 line = []
-
-                # 1. SUIT & SHIRT (gy in 32..37)
-                if 32 <= gy <= 37:
-                    v_left = 22 + (gy - 32)
-                    v_right = 35 - (gy - 32)
-                    s_left = max(0, 15 - (gy - 32) * 3)
-                    s_right = min(57, 42 + (gy - 32) * 3)
-                    for gx in range(grid_w):
-                        if gx < s_left or gx > s_right:
-                            line.append(" ")
-                        elif gx < v_left:
-                            line.append("@" if (gx + gy) % 2 == 0 else "#")
-                        elif gx == v_left:
-                            line.append("/")
-                        elif v_left < gx < v_right:
-                            if gx in (28, 29) and gy in (33, 34):
-                                line.append(" ")
-                            else:
-                                line.append("." if gy < 35 else ":")
-                        elif gx == v_right:
-                            line.append("\\")
-                        else:
-                            line.append("@" if (gx + gy) % 2 == 0 else "#")
-                    rows.append("".join(line))
-                    continue
-
-                # 2. NECK (gy in 28..31)
-                if 28 <= gy <= 31:
-                    for gx in range(grid_w):
-                        if gx == 22:
-                            line.append("|")
-                        elif gx == 35:
-                            line.append("|")
-                        elif 23 <= gx <= 34:
-                            if gx in (28, 29) and gy in (29, 30):
-                                line.append(":")
-                            elif (gx + gy) % 3 == 0:
-                                line.append(".")
-                            else:
-                                line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 3. CHIN (gy == 27)
-                if gy == 27:
-                    for gx in range(grid_w):
-                        if gx == 22:
-                            line.append("\\")
-                        elif 23 <= gx <= 34:
-                            line.append("_")
-                        elif gx == 35:
-                            line.append("/")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 4. JAW (gy in 24..26)
-                if gy == 26:
-                    for gx in range(grid_w):
-                        if gx == 21:
-                            line.append("\\")
-                        elif gx == 36:
-                            line.append("/")
-                        elif 22 <= gx <= 35:
-                            line.append("." if (gx + gy) % 4 == 0 else " ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy == 25:
-                    for gx in range(grid_w):
-                        if gx == 20:
-                            line.append("\\")
-                        elif gx == 37:
-                            line.append("/")
-                        elif 21 <= gx <= 36:
-                            line.append("." if (gx + gy) % 3 == 0 else " ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy == 24:
-                    for gx in range(grid_w):
-                        if gx == 19:
-                            line.append("\\")
-                        elif gx == 38:
-                            line.append("/")
-                        elif 26 <= gx <= 30:
-                            line.append("-")
-                        elif 20 <= gx <= 37:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 5. SMILE & WHITE TEETH (gy in 21..23)
-                if gy == 23:
-                    for gx in range(grid_w):
-                        if gx == 19:
-                            line.append("|")
-                        elif gx == 38:
-                            line.append("|")
-                        elif gx == 22:
-                            line.append("'")
-                        elif 23 <= gx <= 33:
-                            line.append("=")
-                        elif gx == 34:
-                            line.append("'")
-                        elif 20 <= gx <= 37:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy == 22:
-                    for gx in range(grid_w):
-                        if gx == 18:
-                            line.append("|")
-                        elif gx == 39:
-                            line.append("|")
-                        elif gx == 22:
-                            line.append("[")
-                        elif gx in (24, 26, 28, 30, 32):
-                            line.append("|")
-                        elif gx in (23, 25, 27, 29, 31, 33):
-                            line.append(" ")
-                        elif gx == 34:
-                            line.append("]")
-                        elif 19 <= gx <= 38:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy == 21:
-                    for gx in range(grid_w):
-                        if gx == 18:
-                            line.append("|")
-                        elif gx == 39:
-                            line.append("|")
-                        elif gx == 22:
-                            line.append(".")
-                        elif 23 <= gx <= 33:
-                            line.append("=")
-                        elif gx == 34:
-                            line.append(".")
-                        elif 19 <= gx <= 38:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 6. NOSE (gy in 18..20)
-                if gy == 20:
-                    for gx in range(grid_w):
-                        if gx == 18:
-                            line.append("|")
-                        elif gx == 39:
-                            line.append("|")
-                        elif gx == 27:
-                            line.append("(")
-                        elif gx in (28, 29):
-                            line.append(".")
-                        elif gx == 30:
-                            line.append(")")
-                        elif 19 <= gx <= 38:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy in (18, 19):
-                    for gx in range(grid_w):
-                        if gx == 18:
-                            line.append("|")
-                        elif gx == 39:
-                            line.append("|")
-                        elif gx in (28, 29):
-                            line.append("|")
-                        elif 19 <= gx <= 38:
-                            line.append("." if (gx + gy) % 4 == 0 else " ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 7. AVIATOR GLASSES (gy in 14..17)
-                if gy == 17:
-                    for gx in range(grid_w):
-                        if gx == 17:
-                            line.append("\\")
-                        elif 18 <= gx <= 26:
-                            line.append("_")
-                        elif gx == 27:
-                            line.append("/")
-                        elif gx in (28, 29):
-                            line.append("|")
-                        elif gx == 30:
-                            line.append("\\")
-                        elif 31 <= gx <= 39:
-                            line.append("_")
-                        elif gx == 40:
-                            line.append("/")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy in (15, 16):
-                    for gx in range(grid_w):
-                        if gx in (17, 27):
-                            line.append("|")
-                        elif gx in (21, 22):
-                            line.append("@" if gy == 15 else "*")
-                        elif 18 <= gx <= 26:
-                            line.append(" ")
-                        elif gx in (28, 29):
-                            line.append("-" if gy == 16 else " ")
-                        elif gx in (30, 40):
-                            line.append("|")
-                        elif gx in (35, 36):
-                            line.append("@" if gy == 15 else "*")
-                        elif 31 <= gx <= 39:
-                            line.append(" ")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                if gy == 14:
-                    for gx in range(grid_w):
-                        if 17 <= gx <= 40:
-                            if gx in (17, 27, 30, 40):
-                                line.append("+")
-                            elif gx in (28, 29):
-                                line.append("-")
-                            else:
-                                line.append("=")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 8. EYEBROWS (gy == 13)
-                if gy == 13:
-                    for gx in range(grid_w):
-                        if 18 <= gx <= 26 or 31 <= gx <= 39:
-                            line.append("~")
-                        else:
-                            line.append(" ")
-                    rows.append("".join(line))
-                    continue
-
-                # 9. HAIR & FOREHEAD (gy in 0..12)
-                y0 = int(gy * ch / grid_h)
-                y1 = int((gy + 1) * ch / grid_h)
-                if gy == 0:
-                    h_left, h_right = 24, 34
-                elif gy == 1:
-                    h_left, h_right = 20, 37
-                elif gy == 2:
-                    h_left, h_right = 17, 39
-                elif gy == 3:
-                    h_left, h_right = 16, 40
-                elif gy <= 7:
-                    h_left, h_right = 15, 41
-                else:
-                    h_left, h_right = 16, 41
-
-                for gx in range(grid_w):
-                    if gx < h_left or gx > h_right:
-                        line.append(" ")
+                for gx in range(width):
+                    if gx < s_min or gx > s_max:
+                        line.append(' ')
                         continue
-                    x0 = int(gx * cw / grid_w)
-                    x1 = int((gx + 1) * cw / grid_w)
+                    x0 = int(gx * cw / width)
+                    x1 = int((gx + 1) * cw / width)
                     block = arr[y0:y1, x0:x1]
-                    m = np.mean(block)
-                    if m < 35:
-                        line.append("@" if (gx + gy) % 2 == 0 else "#")
-                    elif m < 60:
-                        line.append("#" if (gx + gy) % 2 == 0 else "%")
-                    elif m < 90:
-                        line.append("%")
-                    elif m < 125:
-                        line.append("*")
-                    elif m < 155:
-                        line.append(":")
-                    else:
-                        line.append("." if (gx + gy) % 2 == 0 else " ")
-                rows.append("".join(line))
+                    p = np.mean(block)
+                    idx = int(p / 256.0 * len(RAMP))
+                    idx = max(0, min(len(RAMP) - 1, idx))
+                    line.append(RAMP[idx])
+                rows.append(''.join(line))
 
-            with open(ascii_cache_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(rows) + "\n")
-            print(f"Cached {len(rows)} ASCII rows to {ascii_cache_path}")
+            with open(ascii_cache_path, 'w', encoding='utf-8') as f_out:
+                for r in rows:
+                    f_out.write(r + chr(10))
             return rows
     except Exception as e:
         print(f"Notice: Pillow ASCII generator fallback triggered ({e})")
 
-    if cached_rows:
-        return cached_rows
+    if os.path.exists(ascii_cache_path):
+        try:
+            with open(ascii_cache_path, 'r', encoding='utf-8') as f_in:
+                cached = [l.strip(chr(13) + chr(10)) for l in f_in]
+                if len(cached) == height and len(cached[0]) == width:
+                    return cached
+        except Exception:
+            pass
 
-    return [" " * width for _ in range(height)]
+    return [' ' * width for _ in range(height)]
 
 
+# ---------------------------------------------------------------------------
 # CARD 1: HERO CARD (cards/hero.svg)
 # ---------------------------------------------------------------------------
 
