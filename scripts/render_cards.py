@@ -303,8 +303,10 @@ def load_or_fetch_contributions():
             m_days = []
             for d in w["contributionDays"]:
                 dt = d["date"]
-                live_cnt = d.get("contributionCount", 0) if fetched_weeks else 0
-                cnt = max(local_map.get(dt, 0), live_cnt, daily_events.get(dt, 0))
+                if fetched_weeks:
+                    cnt = d.get("contributionCount", 0)
+                else:
+                    cnt = max(local_map.get(dt, 0), daily_events.get(dt, 0))
                 m_day = {
                     "contributionCount": cnt,
                     "date": dt,
