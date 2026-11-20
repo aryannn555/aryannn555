@@ -63,7 +63,7 @@
   <!-- Header -->
   <g class="fade-elem" style="animation-delay: 0.95s;">
     <text class="geist" x="42" y="46" fill="#4B5D72" font-size="11" font-weight="600" letter-spacing="1.5">THE LAST 12 MONTHS ON GITHUB</text>
-    <text class="serif" x="42" y="90" font-size="44" fill="#13233A">327 <tspan font-style="italic">contributions</tspan></text>
+    <text class="serif" x="42" y="90" font-size="44" fill="#13233A">329 <tspan font-style="italic">contributions</tspan></text>
   </g>
 
   <!-- Bar Chart -->
@@ -83,15 +83,15 @@
   <text class="geist" x="309.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Jun</text>
   <rect class="chart-bar" x="336" y="228" width="30" height="8" rx="3" fill="#13233A" style="animation-delay: 1.225s; transform-origin: 336px 236px;" />
   <text class="geist" x="351.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Jul</text>
-  <rect class="chart-bar" x="378" y="207" width="30" height="29" rx="3" fill="#13233A" style="animation-delay: 1.25s; transform-origin: 378px 236px;" />
+  <rect class="chart-bar" x="378" y="208" width="30" height="28" rx="3" fill="#13233A" style="animation-delay: 1.25s; transform-origin: 378px 236px;" />
   <text class="geist" x="393.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Aug</text>
-  <rect class="chart-bar" x="420" y="186" width="30" height="50" rx="3" fill="#13233A" style="animation-delay: 1.275s; transform-origin: 420px 236px;" />
+  <rect class="chart-bar" x="420" y="187" width="30" height="49" rx="3" fill="#13233A" style="animation-delay: 1.275s; transform-origin: 420px 236px;" />
   <text class="geist" x="435.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Sep</text>
   <rect class="chart-bar" x="462" y="200" width="30" height="36" rx="3" fill="#13233A" style="animation-delay: 1.3s; transform-origin: 462px 236px;" />
   <text class="geist" x="477.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Oct</text>
   <rect class="chart-bar" x="504" y="136" width="30" height="100" rx="3" fill="#2F7FD8" style="animation-delay: 1.325s; transform-origin: 504px 236px;" />
   <text class="geist" x="519.0" y="254" text-anchor="middle" fill="#4B5D72" font-size="11">Nov</text>
-  <text class="geist fade-elem" x="519.0" y="128" text-anchor="middle" fill="#2F7FD8" font-size="11" font-weight="700" style="animation-delay: 1.35s;">123</text>
+  <text class="geist fade-elem" x="519.0" y="128" text-anchor="middle" fill="#2F7FD8" font-size="11" font-weight="700" style="animation-delay: 1.35s;">125</text>
 
   <line x1="600" y1="40" x2="600" y2="240" stroke="rgba(19, 35, 58, 0.12)" stroke-width="1.5" />
 
