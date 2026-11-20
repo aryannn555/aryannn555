@@ -402,14 +402,20 @@ def load_or_fetch_contributions():
 
 def generate_avatar_ascii(width=58, height=38):
     """
-    Renders high-definition photographic grayscale halftone ASCII art directly from assets/avatar.png:
-    - Accurate crop of Aryan Gupta's portrait: hair, aviator glasses, smile, neck, and jacket lapels.
-    - Continuous-tone grayscale ramp (@#%xo;:,. ) for photographic shading.
-    - Clean silhouette boundary masking so background is pure cream/whitespace.
-    - Caches to assets/avatar_ascii.txt.
+    Returns the user-curated portrait ASCII art from assets/avatar_ascii.txt.
+    Falls back to photographic Pillow generation if not present.
     """
     avatar_path = os.path.join(ROOT_DIR, "assets", "avatar.png")
     ascii_cache_path = os.path.join(ROOT_DIR, "assets", "avatar_ascii.txt")
+
+    if os.path.exists(ascii_cache_path):
+        try:
+            with open(ascii_cache_path, "r", encoding="utf-8") as f_in:
+                cached = f_in.read().splitlines()
+                if len(cached) == height and len(cached[0]) == width:
+                    return cached
+        except Exception as e:
+            print(f"Notice: reading ascii cache failed: {e}")
 
     try:
         from PIL import Image, ImageEnhance
@@ -456,26 +462,17 @@ def generate_avatar_ascii(width=58, height=38):
                     line.append(RAMP[idx])
                 rows.append(''.join(line))
 
-            with open(ascii_cache_path, 'w', encoding='utf-8') as f_out:
-                for r in rows:
-                    f_out.write(r + chr(10))
+            with open(ascii_cache_path, "w", encoding="utf-8") as f_out:
+                f_out.write("\n".join(rows) + "\n")
             return rows
     except Exception as e:
         print(f"Notice: Pillow ASCII generator fallback triggered ({e})")
 
-    if os.path.exists(ascii_cache_path):
-        try:
-            with open(ascii_cache_path, 'r', encoding='utf-8') as f_in:
-                cached = [l.strip(chr(13) + chr(10)) for l in f_in]
-                if len(cached) == height and len(cached[0]) == width:
-                    return cached
-        except Exception:
-            pass
-
-    return [' ' * width for _ in range(height)]
+    return [" " * width for _ in range(height)]
 
 
 # ---------------------------------------------------------------------------
+
 # CARD 1: HERO CARD (cards/hero.svg)
 # ---------------------------------------------------------------------------
 
