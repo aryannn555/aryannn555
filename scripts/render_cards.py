@@ -524,7 +524,7 @@ def render_hero_card():
         '  <!-- High-Density Silhouette ASCII Portrait -->',
     ]
 
-    start_x = 515
+    start_x = 565
     start_y = 36
     step_y = 8.1
 
