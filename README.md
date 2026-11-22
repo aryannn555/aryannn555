@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Hero Card -->
-<a href="https://aryangupta-nu.vercel.app"><img src="./cards/hero.svg" width="100%" alt="Aryan Gupta - Fullstack & Audio Engineer" /></a>
+<a href="https://aryangupta-nu.vercel.app"><img src="./cards/hero.svg" width="100%" alt="hi im Aryan Gupta" /></a>
 
 <br/><br/>
 
