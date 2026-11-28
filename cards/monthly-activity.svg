@@ -100,7 +100,7 @@
     <text class="brico" x="640" y="102" font-size="12.5" fill="#4B5D72">current streak, and the longest</text>
   </g>
   <g class="fade-elem" style="animation-delay: 1.25s;">
-    <text class="serif" x="640" y="154" font-size="34" fill="#13233A">45 <tspan font-size="24" fill="#4B5D72">/ 370</tspan></text>
+    <text class="serif" x="640" y="154" font-size="34" fill="#13233A">45 <tspan font-size="24" fill="#4B5D72">/ 371</tspan></text>
     <text class="brico" x="640" y="178" font-size="12.5" fill="#4B5D72">days with a commit</text>
   </g>
   <g class="fade-elem" style="animation-delay: 1.30s;">
